@@ -38,10 +38,12 @@ apt install -y -qq lsphp74-common lsphp74-curl lsphp74-imap lsphp74-json \
 lsphp74-mysql lsphp74-opcache lsphp74-imagick lsphp74-memcached lsphp74-redis
 
 if [ ! -f /usr/bin/php ]; then
+	echo "checking ${LSPATH}/${PHPVER}/bin/php"
+	ls -l ${LSPATH}/${PHPVER}/bin
 	if [ -e ${LSPATH}/${PHPVER}/bin/php ]; then
 		ln -s ${LSPATH}/${PHPVER}/bin/php /usr/bin/php
 	else
-		echoR "${LSPATH}/${PHPVER}/bin/php not exist, please check your PHP version!"
+		echo "${LSPATH}/${PHPVER}/bin/php not exist, please check your PHP version!"
 		exit 1 
 	fi        
 fi
