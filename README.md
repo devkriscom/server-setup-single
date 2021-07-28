@@ -10,7 +10,7 @@ DOMAIN  : managedb.wordspec.com pointed to server ip
 1. download and run installer  
 $ cd /home  
 $ apt install -y -qq curl
-$ curl -sO https://bitbucket.org/wordspec/single-server/src/master/install.sh  
+$ curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/install.sh  
 $ chmod +x install.sh  
 $ ./install.sh  
 

@@ -1,4 +1,5 @@
 #!/bin/sh
+DOMAIN=$1
 WWROOT='/home'
 PHPNUM='7.4'
 PHPVER=lsphp74
@@ -56,15 +57,16 @@ apt install -y -qq vsftpd
 echo "\n Install mariadb ...\n"
 apt install -y -qq mariadb-server mariadb-client
 systemctl restart mysql
-systemctl enable mysql
-DBUPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '');
+
+DBUSERPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '');
 mysql -e "UPDATE mysql.user SET Password = PASSWORD('${DBUSERPASS}') WHERE User = 'root'"
 mysql -e "DROP USER ''@'localhost'"
 mysql -e "DROP USER ''@'$(hostname)'"
 mysql -e "DROP DATABASE test"
 mysql -e "FLUSH PRIVILEGES"
-echo "${DBUSERPASS}" > ${WWROOT}/.mysql_root_password
+echo "${DBUSERPASS}" > ${DBROOT}
 systemctl restart mysql
+systemctl enable mysql
 
 echo "\n Install supervisor ...\n"
 apt -y install supervisor
@@ -86,10 +88,10 @@ if [ ! -e /usr/local/bin/wp ]; then
 	mv wp-cli.phar /usr/local/bin/wp
 fi  
 
+
 echo "\n Install composer ...\n"
 if [ ! -e /usr/local/bin/composer ]; then
 	curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --force --filename=composer
-	composer --version
 fi
 
 echo "\n Install virtualhost ...\n"
@@ -180,12 +182,19 @@ unzip ${WWROOT}/managedb/latest.zip
 mv ${WWROOT}/phpMyAdmin-5.1.1-all-languages html
 rm ${WWROOT}/phpMyAdmin-5.1.1-all-languages.zip
 
-
 echo "Install postfix"
 apt install -y postfix 
 apt install -y mailutils
 sed -i 's,^inet_interfaces =.*$,inet_interfaces = loopback-only,' /etc/postfix/main.cf
 sudo systemctl restart postfix
 
+echo "Setup litespeed admin password"
+sudo /usr/local/lsws/admin/misc/admpass.sh 
+
+while [ "$DOMAIN" != "" ]; do
+	echo "Setup domain"
+	xdomain create $DOMAIN auto
+	xdomain create managedb.$DOMAIN auto
+done
 # Clean up cache
 apt clean
