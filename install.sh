@@ -94,42 +94,42 @@ fi
 
 echo "\n Install virtualhost ...\n"
 if [ ! -e /usr/local/bin/xdomain ]; then
-	curl -sO https://bitbucket.org/wordspec/single-server/src/master/helper/xdomain.sh
+	curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper/xdomain.sh
 	chmod +x xdomain.sh
 	mv xdomain.sh /usr/local/bin/xdomain
 fi
 
 echo "\n Install database backup ...\n"
 if [ ! -e /usr/local/bin/xdbsave ]; then
-	curl -sO https://bitbucket.org/wordspec/single-server/src/master/helper/xdbsave.sh
+	curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper/xdbsave.sh
 	chmod +x xdbsave.sh
 	mv xdbsave.sh /usr/local/bin/xdbsave
 fi
 
 echo "\n Install site file backup ...\n"
 if [ ! -e /usr/local/bin/xdrsave ]; then
-	curl -sO https://bitbucket.org/wordspec/single-server/src/master/helper/xdrsave.sh
+	curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper/xdrsave.sh
 	chmod +x xdrsave.sh
 	mv xdrsave.sh /usr/local/bin/xdrsave
 fi
 
 echo "\n Install remote backup ...\n"
 if [ ! -e /usr/local/bin/xbackup ]; then
-	curl -sO https://bitbucket.org/wordspec/single-server/src/master/helper/xbackup.sh
+	curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper/xbackup.sh
 	chmod +x xbackup.sh
 	mv xbackup.sh /usr/local/bin/xbackup
 fi
 
 echo "\n Install remote cloner ...\n"
 if [ ! -e /usr/local/bin/xcloner ]; then
-	curl -sO https://bitbucket.org/wordspec/single-server/src/master/helper/xcloner.sh
+	curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper/xcloner.sh
 	chmod +x xcloner.sh
 	mv xcloner.sh /usr/local/bin/xcloner
 fi
 
 echo "\n Install malware scanner ...\n"
 if [ ! -e /usr/local/bin/xsecure ]; then
-	curl -sO https://bitbucket.org/wordspec/single-server/src/master/helper/xsecure.sh
+	curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper/xsecure.sh
 	chmod +x xsecure.sh
 	mv xsecure.sh /usr/local/bin/xsecure
 fi
@@ -156,13 +156,13 @@ mkdir -p "${BKPATH%/*}"
 
 echo "Optimize database"
 if [ ! -e /etc/mysql/conf.d/optimy.cnf ]; then
-	curl -sO https://bitbucket.org/wordspec/single-server/src/master/config/mysql.cnf 
+	curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/config/mysql.cnf 
 	mv mysql.cnf /etc/mysql/conf.d/optimy.cnf 
   systemctl restart mysql 
 fi
 
 if [ ! -e /etc/mysql/conf.d/optimy.cnf ]; then
-	curl -sO https://bitbucket.org/wordspec/single-server/src/master/config/mysql.cnf 
+	curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/config/mysql.cnf 
 	mv mysql.cnf /etc/mysql/conf.d/optimy.cnf 
   systemctl restart mysql 
 fi
