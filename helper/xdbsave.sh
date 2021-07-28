@@ -8,6 +8,5 @@ FOLDER=${BKPATH}/database/$(date +%Y-%m-%d)
 mkdir -p ${FOLDER}
 databases=`mysql --user=root -pDBPASS -e "SHOW DATABASES;" | grep -Ev "(Database|information_schema|performance_schema)"`
 for db in $databases; do
-	echo "backup $db now";
-	mysqldump $db | gzip > $FOLDER/$db-$(date +%Y-%m-%d-%H-%M).sql.gz
+	mysqldump -u root -p${DBPASS} ${db} | gzip > $FOLDER/$db-$(date +%Y-%m-%d-%H-%M).sql.gz
 done

@@ -25,7 +25,6 @@ else
 fi
 
 
-
 echo "\n Update Ubuntu ...\n"
 apt update
 
@@ -177,23 +176,14 @@ sed -i 's,^memory_limit =.*$,memory_limit = 2048M,' ${LSPATH}/${PHPVER}/etc/php/
 sed -i 's,^post_max_size =.*$,post_max_size = 128M,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini  
 sed -i 's,^upload_max_filesize =.*$,upload_max_filesize = 128M,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini 
 
-echo "Download phpmyadmin"
-mkdir -p ${WWROOT}/managedb
-wget -P ${WWROOT}/managedb https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip
-unzip ${WWROOT}/managedb/phpMyAdmin-${DBMNUM}-all-languages.zip -d ${WWROOT}/managedb/
-mv ${WWROOT}/managedb/phpMyAdmin-${DBMNUM}-all-languages ${WWROOT}/managedb/html
-rm ${WWROOT}/managedb/phpMyAdmin-${DBMNUM}-all-languages.zip
-
 echo "Install postfix"
 apt install -y postfix 
 apt install -y mailutils
 sed -i 's,^inet_interfaces =.*$,inet_interfaces = loopback-only,' /etc/postfix/main.cf
 sudo systemctl restart postfix
 
-
 # Clean up cache
 apt clean
-
 
 echo "Setup litespeed admin password"
 sudo /usr/local/lsws/admin/misc/admpass.sh 
