@@ -28,13 +28,13 @@ echo "\n Update Ubuntu ...\n"
 apt update
 
 echo "\n Install basic toolkits ...\n"
-apt install -y -qq wget curl zip unzip git rsync
+apt install -y wget curl zip unzip git rsync
 
 echo "\n Install litespeed ...\n"
 wget -O - http://rpms.litespeedtech.com/debian/enable_lst_debian_repo.sh | sudo bash
 apt update
-apt install -y -qq openlitespeed
-apt install -y -qq lsphp74-common lsphp74-curl lsphp74-imap lsphp74-json \
+apt install -y openlitespeed
+apt install -y lsphp74-common lsphp74-curl lsphp74-imap lsphp74-json \
 lsphp74-mysql lsphp74-opcache lsphp74-imagick lsphp74-memcached lsphp74-redis
 
 if [ ! -f /usr/bin/php ]; then
@@ -49,16 +49,16 @@ if [ ! -f /usr/bin/php ]; then
 fi
 
 echo "\n Install certbot ...\n"
-apt install -y -qq certbot
+apt install -y certbot
 
 echo "\n Install memcached ...\n"
-apt install -y -qq memcached
+apt install -y memcached
 
 echo "\n Install vsftpd ...\n"
-apt install -y -qq vsftpd
+apt install -y vsftpd
 
 echo "\n Install mariadb ...\n"
-apt install -y -qq mariadb-server mariadb-client
+apt install -y mariadb-server mariadb-client
 systemctl restart mysql
 
 DBUSERPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '');
@@ -142,7 +142,7 @@ fi
 
 # Install Firewall
 echo "Fireall setup..."
-apt install -y -qq ufw
+apt install -y ufw
 ufw allow 22,53,80,443,7080,8088/tcp
 ufw default reject
 ufw enable
@@ -151,7 +151,7 @@ ufw enable
 echo "
 listener HTTP {
   address                 *:80
-  secure                  1
+  secure                  0
 }
 listener HTTPS {
   address                 *:443
@@ -192,13 +192,14 @@ apt install -y mailutils
 sed -i 's,^inet_interfaces =.*$,inet_interfaces = loopback-only,' /etc/postfix/main.cf
 sudo systemctl restart postfix
 
+
+# Clean up cache
+apt clean
+
+
 echo "Setup litespeed admin password"
 sudo /usr/local/lsws/admin/misc/admpass.sh 
 
 while [ "$DOMAIN" != "" ]; do
-	echo "Setup domain"
 	xdomain create $DOMAIN auto
-	xdomain create managedb.$DOMAIN auto
 done
-# Clean up cache
-apt clean
