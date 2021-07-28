@@ -2,6 +2,7 @@
 DOMAIN=$1
 WWROOT='/home'
 PHPNUM='7.4'
+DBMNUM='5.1.1'
 PHPVER=lsphp74
 LSPATH='/usr/local/lsws'
 BKPATH='/var/www/backup'
@@ -59,12 +60,13 @@ apt install -y -qq mariadb-server mariadb-client
 systemctl restart mysql
 
 DBUSERPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '');
+
 mysql -e "UPDATE mysql.user SET Password = PASSWORD('${DBUSERPASS}') WHERE User = 'root'"
 mysql -e "DROP USER ''@'localhost'"
 mysql -e "DROP USER ''@'$(hostname)'"
 mysql -e "DROP DATABASE test"
 mysql -e "FLUSH PRIVILEGES"
-echo "${DBUSERPASS}" > ${DBROOT}
+echo '"${DBUSERPASS}"' > ${DBROOT}
 systemctl restart mysql
 systemctl enable mysql
 
@@ -177,10 +179,10 @@ sed -i 's,^upload_max_filesize =.*$,upload_max_filesize = 128M,' ${LSPATH}/${PHP
 
 echo "Download phpmyadmin"
 mkdir -p "${WWROOT}/managedb"
-wget https://files.phpmyadmin.net/phpMyAdmin/5.1.1/phpMyAdmin-5.1.1-all-languages.zip -0 ${WWROOT}/managedb/latest.zip
-unzip ${WWROOT}/managedb/latest.zip
-mv ${WWROOT}/phpMyAdmin-5.1.1-all-languages html
-rm ${WWROOT}/phpMyAdmin-5.1.1-all-languages.zip
+wget https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip -o ${WWROOT}/managedb/latest.zip
+unzip ${WWROOT}/managedb/phpMyAdmin-${DBMNUM}-all-languages.zip
+mv ${WWROOT}/managedb/phpMyAdmin-${DBMNUM}-all-languages html
+rm ${WWROOT}/managedb/phpMyAdmin-${DBMNUM}-all-languages.zip
 
 echo "Install postfix"
 apt install -y postfix 
