@@ -1,5 +1,5 @@
 #!/bin/bash
-### Set default parameters
+
 ACTION=$1
 DOMAIN=$2
 SECURE=$3
@@ -9,7 +9,7 @@ LSPATH='/usr/local/lsws'
 VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
 DBROOT="${WWROOT}/.mysql_root_password"
-DBPASS=$(cat ${DBROOT} | head -n 1 | awk {print $2})
+DBPASS=$(cat ${DBROOT} | head -n 1 | awk '{print}')
 
 if [ "$ACTION" != 'create' ] && [ "$ACTION" != 'delete' ]; then
 	echo $"You need to select ACTION (create or delete) -- Lower-case only"
@@ -22,7 +22,7 @@ while [ "$DOMAIN" == "" ]; do
 done
 
 while [ "$SECURE" == "" ]; do
-	echo -e $"SSL: (auto|none)"
+	echo -e $"SSL (auto|none):"
 	read SECURE
 done
 
@@ -57,7 +57,6 @@ else
 fi
 
 SITEMAIL="admin@${DOMAIN}";
-SITENAME=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 USERNAME=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 
 DATAUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
@@ -65,21 +64,36 @@ DATABASE=$(echo "${DOMAIN}" | sed -e 's/\./_/g')
 DATAPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
 USERPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
 
-SITEROOT="${WWROOT}/${SITENAME}";
-SITEHTML="${WWROOT}/${SITENAME}/html";
+SITEROOT="${WWROOT}/${USERNAME}";
+SITEHTML="${WWROOT}/${USERNAME}/html";
 SITECONF="${VHPATH}/${DOMAIN}/vhconf.conf";
-if [ "$ACTION" == 'create' ]; then
 
+if [ "$ACTION" == 'create' ]; then
+	sed -i "/$DOMAIN/d"  ${WWROOT}/.domains
+	sed -i "/$USERNAME/d" ${WWROOT}/.usernames
+fi
+
+if [ "$ACTION" == 'create' ]; then
+	ALLOW="NO"
 	# verify if user alreay exist
 	egrep "^$USERNAME" /etc/passwd > /dev/null
 	if [ $? -eq 0 ]; then
-		echo "$USERNAME exists! please create using another user"
-		exit 1
+		if [ -d "${SITEROOT}" ]; then
+			echo "$USERNAME exists! please create using another user"
+			exit 1
+		else
+			ALLOW="YES"
+			usermod -d $SITEROOT $USERNAME
+		fi
+	else
+		useradd -m -p "$USERPASS" "$USERNAME" -d "$SITEROOT"
+		if [ $? -eq 0 ]; then
+			ALLOW="YES"
+		fi
 	fi
 
-	useradd -m -p "$USERPASS" "$USERNAME" -d "$SITEROOT"
-	if [ $? -eq 0 ]; then
-		mkdir $SITEHTML
+	if [ "$ALLOW" == 'YES' ]; then
+		mkdir -p $SITEHTML
 		if [ ! -f "${SITEHTML}/index.php" ]; then
 			echo "<?php echo phpinfo(); ?>" > $SITEHTML/index.php
 		fi
@@ -99,14 +113,19 @@ if [ "$ACTION" == 'create' ]; then
 
 		# create database
 		if [ -e ${DBROOT} ]; then
-			mysql -u root -p${DBPASS} -e "create database ${DATABASE};"
-			if [ ${?} = 0 ]; then
-				mysql -u root -p${DBPASS} -e "CREATE USER '${DATAUSER}'@'%' IDENTIFIED BY '${DATAPASS}';"
-				mysql -u root -p${DBPASS} -e "GRANT ALL PRIVILEGES ON * . * TO '${DATAUSER}'@'%';"
-				mysql -u root -p${DBPASS} -e "FLUSH PRIVILEGES;"
-				mysql -u root -p${DBPASS} -e "SHOW GRANTS FOR '${DATAUSER}'@'%';"
+			if ! mysql -u root -p${DBPASS} -e "use ${DATABASE};"; then
+				mysql -u root -p${DBPASS} -e "create database ${DATABASE};"
+				if [ ${?} = 0 ]; then
+					mysql -u root -p${DBPASS} -e "CREATE USER '${DATAUSER}'@'%' IDENTIFIED BY '${DATAPASS}';"
+					mysql -u root -p${DBPASS} -e "GRANT ALL PRIVILEGES ON * . * TO '${DATAUSER}'@'%';"
+					mysql -u root -p${DBPASS} -e "FLUSH PRIVILEGES;"
+					mysql -u root -p${DBPASS} -e "SHOW GRANTS FOR '${DATAUSER}'@'%';"
+				else
+					echo "something went wrong when create new database, please proceed to manual installtion."
+				fi
 			else
-				echo "something went wrong when create new database, please proceed to manual installtion."
+				mysql -u root -p${DBPASS} -e "ALTER USER '${DATAUSER}'@'%' IDENTIFIED BY '${DATAPASS}';"
+				mysql -u root -p${DBPASS} -e "FLUSH PRIVILEGES;"
 			fi
 		else
 			echo "Doesnt have ${DBROOT}, skip creating database!" 
@@ -137,7 +156,7 @@ accesslog \$SITEROOT/logs/access_log {
 }
 
 index  {
-	useServer               0
+	useServer               1
 	indexFiles              index.php, index.html
 }
 
@@ -147,7 +166,7 @@ scripthandler  {
 
 extprocessor ${PHPVER} {
 	type                    lsapi
-	address                 uds://tmp/lshttpd/${SITENAME}.sock
+	address                 uds://tmp/lshttpd/${USERNAME}.sock
 	maxConns                35
 	env                     PHP_LSAPI_CHILDREN=35
 	initTimeout             60
@@ -171,10 +190,6 @@ extprocessor ${PHPVER} {
 rewrite  {
 	enable                  1
 	autoLoadHtaccess        1
-	rules                   <<<END_rules
-	RewriteCond %{SERVER_PORT} 80
-	RewriteRule ^(.*)$ https://${DOMAIN}/\$1 [R,L]
-	END_rules
 }
 EOF
 
@@ -199,13 +214,13 @@ restrained              1
             line_insert ":${PORT}$"  ${LSCONF} "${MAPPER}" 2
         done
     else
-        echoR 'No listener port detected, listener setup skip!'    
+        echo 'No listener port detected, listener setup skip!'    
     fi
 			echo "Updating ${LSCONF} with new virtuals host record" 
 			chown -R lsadm:lsadm ${VHPATH}/*
 			systemctl restart lsws
 		else
-			echoR "Targeted file already exist, skip!"
+			echo "Targeted file already exist, skip!"
 		fi
 
 		# create ssl cerfiticate

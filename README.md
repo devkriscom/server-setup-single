@@ -11,15 +11,18 @@ DOMAIN  : managedb.wordspec.com pointed to server ip
 $ cd /home  
 $ apt install -y -qq curl
 
+rm droper.sh
+curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/droper.sh
+chmod +x ./droper.sh
+bash ./droper.sh
+
+
 rm install.sh
 curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/install.sh
 chmod +x install.sh 
 bash ./install.sh
 
-rm droper.sh
-curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/droper.sh
-chmod +x ./droper.sh
-bash ./droper.sh
+
 $ chmod +x install.sh 
 # Step  1: Setup MySQL  
 1. Get root mysql user  

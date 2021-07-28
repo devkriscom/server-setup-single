@@ -24,6 +24,8 @@ else
 	exit 1
 fi
 
+
+
 echo "\n Update Ubuntu ...\n"
 apt update
 
@@ -176,10 +178,10 @@ sed -i 's,^post_max_size =.*$,post_max_size = 128M,' ${LSPATH}/${PHPVER}/etc/php
 sed -i 's,^upload_max_filesize =.*$,upload_max_filesize = 128M,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini 
 
 echo "Download phpmyadmin"
-mkdir -p "${WWROOT}/managedb"
-wget https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip -o ${WWROOT}/managedb/latest.zip
-unzip ${WWROOT}/managedb/phpMyAdmin-${DBMNUM}-all-languages.zip
-mv ${WWROOT}/managedb/phpMyAdmin-${DBMNUM}-all-languages html
+mkdir -p ${WWROOT}/managedb
+wget -P ${WWROOT}/managedb https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip
+unzip ${WWROOT}/managedb/phpMyAdmin-${DBMNUM}-all-languages.zip -d ${WWROOT}/managedb/
+mv ${WWROOT}/managedb/phpMyAdmin-${DBMNUM}-all-languages ${WWROOT}/managedb/html
 rm ${WWROOT}/managedb/phpMyAdmin-${DBMNUM}-all-languages.zip
 
 echo "Install postfix"
