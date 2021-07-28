@@ -1,0 +1,86 @@
+[mysql]
+max_allowed_packet              = 256M
+
+[mysqld]
+max_allowed_packet              = 256M
+max_connect_errors              = 1000000
+skip_external_locking
+skip_name_resolve
+
+
+# === SQL Compatibility Mode ===
+#sql_mode                       = ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION,ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES
+
+# === InnoDB Settings ===
+default_storage_engine          = InnoDB
+innodb_buffer_pool_instances    = 4     # Use 1 instance per 1GB
+innodb_buffer_pool_size         = 4G    # Use up to 70-80% of RAM
+innodb_file_per_table           = 1
+innodb_flush_log_at_trx_commit  = 0
+innodb_flush_method             = O_DIRECT
+innodb_log_buffer_size          = 16M
+innodb_log_file_size            = 1G
+innodb_stats_on_metadata        = 0
+
+#innodb_temp_data_file_path     = ibtmp1:64M:autoextend:max:20G # Control the maximum size for the ibtmp1 file
+#innodb_thread_concurrency      = 4     # Optional
+innodb_read_io_threads          = 64
+innodb_write_io_threads         = 64
+#innodb_io_capacity             = 1000  # Max is 2000
+
+# === MyISAM Settings ===
+# Do NOT un-comment on MySQL 8.x+
+#query_cache_limit              = 4M    # UPD
+#query_cache_size               = 64M   # UPD
+#query_cache_type               = 1     # Enabled by default
+
+key_buffer_size                 = 32M   # UPD
+
+low_priority_updates            = 1
+concurrent_insert               = 2
+
+# === Connection Settings ===
+max_connections                 = 100   # UPD 
+
+back_log                        = 512
+thread_cache_size               = 100
+thread_stack                    = 192K
+
+interactive_timeout             = 380
+wait_timeout                    = 380
+
+# For MySQL 5.7+ only (disabled by default)
+#max_execution_time             = 30000 
+
+# For MariaDB 10.1.1+ only (disabled by default)
+#max_statement_time             = 30 
+
+# === Buffer Settings ===
+innodb_sort_buffer_size         = 2M    # UPD
+join_buffer_size                = 4M    # UPD
+read_buffer_size                = 3M    # UPD
+read_rnd_buffer_size            = 4M    # UPD
+sort_buffer_size                = 4M    # UPD
+
+# === Table Settings ===
+table_definition_cache          = 40000 # UPD
+table_open_cache                = 40000 # UPD
+open_files_limit                = 60000 # UPD 
+
+max_heap_table_size             = 128M
+tmp_table_size                  = 128M
+
+# === Search Settings ===
+ft_min_word_len                 = 3     # Minimum length of words to be indexed for search results
+
+# === Logging ===
+log_error                       = /var/lib/mysql/mysql_error.log
+log_queries_not_using_indexes   = 1
+long_query_time                 = 5
+slow_query_log                  = 0     # Disabled for production
+slow_query_log_file             = /var/lib/mysql/mysql_slow.log
+
+[mysqldump]
+quick
+quote_names
+max_allowed_packet              = 512M
