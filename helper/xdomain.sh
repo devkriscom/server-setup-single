@@ -1,5 +1,4 @@
 #!/bin/bash
-
 ACTION=$1
 DOMAIN=$2
 SECURE=$3
