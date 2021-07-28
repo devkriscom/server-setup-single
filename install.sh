@@ -24,7 +24,6 @@ else
 	exit 1
 fi
 
-
 echo "\n Update Ubuntu ...\n"
 apt update
 
@@ -60,6 +59,7 @@ apt install -y vsftpd
 
 echo "\n Install mariadb ...\n"
 apt install -y mariadb-server mariadb-client
+
 DBUSERPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '');
 mysql -e "UPDATE mysql.user SET Password = PASSWORD('${DBUSERPASS}') WHERE User = 'root'"
 mysql -e "DROP USER ''@'localhost'"
@@ -68,11 +68,6 @@ mysql -e "DROP DATABASE test"
 mysql -e "FLUSH PRIVILEGES"
 echo "${DBUSERPASS}" > ${DBROOT}
 systemctl restart mysql
-
-echo "\n Install supervisor ...\n"
-apt -y install supervisor
-systemctl restart supervisor
-systemctl enable supervisor
 
 echo "\n Install elasticsearch ...\n"
 curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
@@ -179,7 +174,6 @@ sed -i 's,^upload_max_filesize =.*$,upload_max_filesize = 128M,' ${LSPATH}/${PHP
 echo "Install postfix"
 apt install -y postfix 
 apt install -y mailutils
-sed -i 's,^inet_interfaces =.*$,inet_interfaces = loopback-only,' /etc/postfix/main.cf
 sudo systemctl restart postfix
 
 # Clean up cache

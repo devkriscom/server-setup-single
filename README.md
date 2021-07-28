@@ -23,6 +23,9 @@ chmod +x install.sh
 bash ./install.sh
 
 
+curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper/cloner.sh
+chmod +x cloner.sh 
+
 $ chmod +x install.sh 
 # Step  1: Setup MySQL  
 1. Get root mysql user  
