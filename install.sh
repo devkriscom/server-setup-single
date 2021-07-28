@@ -59,18 +59,14 @@ apt install -y vsftpd
 
 echo "\n Install mariadb ...\n"
 apt install -y mariadb-server mariadb-client
-systemctl restart mysql
-
 DBUSERPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '');
-
 mysql -e "UPDATE mysql.user SET Password = PASSWORD('${DBUSERPASS}') WHERE User = 'root'"
 mysql -e "DROP USER ''@'localhost'"
 mysql -e "DROP USER ''@'$(hostname)'"
 mysql -e "DROP DATABASE test"
 mysql -e "FLUSH PRIVILEGES"
-echo '"${DBUSERPASS}"' > ${DBROOT}
+echo "${DBUSERPASS}" > ${DBROOT}
 systemctl restart mysql
-systemctl enable mysql
 
 echo "\n Install supervisor ...\n"
 apt -y install supervisor

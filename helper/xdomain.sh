@@ -3,14 +3,13 @@
 ACTION=$1
 DOMAIN=$2
 SECURE=$3
-SECRET=$4
-
 WWROOT='/home'
 PHPVER=lsphp74
 LSPATH='/usr/local/lsws'
 VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
 DBROOT="${WWROOT}/.mysql_root_password"
+DBPASS=$(cat ${DBROOT} | head -n 1 | awk {print $2})
 
 if [ "$ACTION" != 'create' ] && [ "$ACTION" != 'delete' ]; then
 	echo $"You need to select ACTION (create or delete) -- Lower-case only"
@@ -27,10 +26,6 @@ while [ "$SECURE" == "" ]; do
 	read SECURE
 done
 
-while [ "$SECRET" == "" ]; do
-	echo -e $"SFTP and USER password: "
-	read SECRET
-done
 
 if [ $(id -u) -eq 0 ]; then
 	echo "You have sudo, processing...."
@@ -61,17 +56,18 @@ else
 	echo "$DOMAIN without www"  
 fi
 
-
-DATANAME=$(echo "${DOMAIN}" | sed -e 's/\./_/g')
-PASSWORD=$(perl -e 'print crypt($SECRET, "password")' $SECRET)
-USERNAME=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
-SITENAME=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 SITEMAIL="admin@${DOMAIN}";
+SITENAME=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
+USERNAME=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
+
+DATAUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
+DATABASE=$(echo "${DOMAIN}" | sed -e 's/\./_/g')
+DATAPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
+USERPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
+
 SITEROOT="${WWROOT}/${SITENAME}";
 SITEHTML="${WWROOT}/${SITENAME}/html";
-SITEPASS="${WWROOT}/.mysql_user_password";
 SITECONF="${VHPATH}/${DOMAIN}/vhconf.conf";
-
 if [ "$ACTION" == 'create' ]; then
 
 	# verify if user alreay exist
@@ -81,30 +77,34 @@ if [ "$ACTION" == 'create' ]; then
 		exit 1
 	fi
 
-	useradd -m -p "$PASSWORD" "$USERNAME" -d "$SITEROOT"
+	useradd -m -p "$USERPASS" "$USERNAME" -d "$SITEROOT"
 	if [ $? -eq 0 ]; then
-		echo "User has been added to system, your ssh/sftp password is: $PASSWORD"
-		
 		mkdir $SITEHTML
 		if [ ! -f "${SITEHTML}/index.php" ]; then
 			echo "<?php echo phpinfo(); ?>" > $SITEHTML/index.php
 		fi
 		chown -R $USERNAME:$USERNAME $SITEROOT
+	
+		echo "${DOMAIN}" >> ${WWROOT}/.domains
+		echo "${USERNAME}" >> ${WWROOT}/.usernames
+		echo "${USERPASS}" > ${SITEROOT}/.userpass
+		echo "${DATAPASS}" > ${SITEROOT}/.datapass
+
+		echo "\n SFTPD username: $USERNAME";
+		echo "\n SFTPD password: $USERPASS";
+		echo "\n MySQL rootpass: $DBPASS";
+		echo "\n MySQL database: $DATABASE";
+		echo "\n MySQL username: $DATAUSER";
+		echo "\n MySQL password: $DATAPASS";
 
 		# create database
 		if [ -e ${DBROOT} ]; then
-			DBROOTPASS=$(cat ${DBROOT} | head -n 1 | awk -F '"' '{print $2}')
-			DBUSERPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
-
-			echo "You myql password is $DBROOTPASS and user $DBUSERPASS";
-			mysql -u root -p${DBROOTPASS} -e "create database ${DATANAME};"
-
+			mysql -u root -p${DBPASS} -e "create database ${DATABASE};"
 			if [ ${?} = 0 ]; then
-				mysql -u root -p${DBROOTPASS} -e "CREATE USER '${USERNAME}'@'%' IDENTIFIED BY '${DBUSERPASS}';"
-				mysql -u root -p${DBROOTPASS} -e "GRANT ALL PRIVILEGES ON * . * TO '${USERNAME}'@'%';"
-				mysql -u root -p${DBROOTPASS} -e "FLUSH PRIVILEGES;"
-				mysql -u root -p${DBROOTPASS} -e "SHOW GRANTS FOR '${USERNAME}'@'%';"
-				echo "${DBUSERPASS}" > ${SITEPASS}
+				mysql -u root -p${DBPASS} -e "CREATE USER '${DATAUSER}'@'%' IDENTIFIED BY '${DATAPASS}';"
+				mysql -u root -p${DBPASS} -e "GRANT ALL PRIVILEGES ON * . * TO '${DATAUSER}'@'%';"
+				mysql -u root -p${DBPASS} -e "FLUSH PRIVILEGES;"
+				mysql -u root -p${DBPASS} -e "SHOW GRANTS FOR '${DATAUSER}'@'%';"
 			else
 				echo "something went wrong when create new database, please proceed to manual installtion."
 			fi
@@ -190,7 +190,7 @@ restrained              1
 		if [ "$USEWWW" == 'TRUE' ]; then
         MAPPER="map                    ${DOMAIN} ${ORIGIN}, ${DOMAIN}"
     else
-        MAPPER="map                     ${DOMAIN} ${DOMAIN}" 
+        MAPPER="map                    ${DOMAIN} ${DOMAIN}" 
     fi
 
     PORT_ARR=$(grep "address.*:[0-9]"  ${LSCONF} | awk '{print substr($2,3)}')
@@ -201,15 +201,12 @@ restrained              1
     else
         echoR 'No listener port detected, listener setup skip!'    
     fi
-
 			echo "Updating ${LSCONF} with new virtuals host record" 
-
 			chown -R lsadm:lsadm ${VHPATH}/*
 			systemctl restart lsws
 		else
 			echoR "Targeted file already exist, skip!"
 		fi
-
 
 		# create ssl cerfiticate
 		if [ "$SECURE" == 'auto' ]; then
