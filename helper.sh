@@ -30,11 +30,6 @@ if [ "$ACTION" != 'install' ]; then
 	chmod +x xsavedr.sh
 	mv xsavedr.sh /usr/local/bin/xsavedr
 
-	echo "create command: xcloner"
-	curl -sO ${GITHUB}/master/helper/xcloner.sh
-	chmod +x xcloner.sh
-	mv xcloner.sh /usr/local/bin/xcloner
-
 	echo "create command: ximport"
 	curl -sO ${GITHUB}/master/helper/ximport.sh
 	chmod +x ximport.sh
