@@ -19,7 +19,8 @@ if [ "$DBPASS" != '' ]; then
 fi
 
 echo "import $FOLDER with dbpass $PASSWD"
-
-tar -xvf ${FOLDER}/file.tar.gz -C html
+tar -xvf ${FOLDER}/file.tar.gz -C ${FOLDER}/html
+mysql -u root -p${PASSWD} -e "drop database ${DBNAME};"
+mysql -u root -p${PASSWD} -e "create database ${DBNAME};"
 zcat ${FOLDER}/data.sql.gz | mysql -u ${DBUSER} -p${PASSWD} ${DBNAME}
 chown -R ${SHUSER}:${SHUSER} /home/${SHUSER}/html
