@@ -55,20 +55,21 @@ SHLOGS="${SHROOT}/logs";
 SHCONF="${VHPATH}/${DOMAIN}/vhconf.conf";
 SHPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
 
-
 DBNAME=$(echo "${DOMAIN}" | sed -e 's/\./_/g')
 DBUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 DBPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
-
 
 if [ "$ACTION" == 'create' ]; then
 	ALLOW="NO"
 	# verify if user alreay exist
 	egrep "^$SHUSER" /etc/passwd > /dev/null
 	if [ $? -eq 0 ]; then
-		# if user exists but doesn't have site, then reassign
-		if [ ! -d "${SHROOT}" ]; then
+		if [ ! -f "${SHCONF}" ]; then
 			ALLOW="YES"
+			# if user exists but doesn't have site, then reassign
+			if [ ! -d "${SHROOT}" ]; then
+				mkdir -p $SHROOT
+			fi
 			usermod -d $SHROOT $SHUSER
 		fi
 	else
@@ -84,18 +85,16 @@ if [ "$ACTION" == 'create' ]; then
 		fi
 
 		if [ ! -d "${SHLOGS}" ]; then
-			mkdir -p $SHHTML
+			mkdir -p ${SHLOGS}
 		fi
 
 		if [ ! -f "${SHLOGS}/error_log" ]; then
-			echo "" > ${SHLOGS}/error_log
+			touch ${SHLOGS}/error_log
 		fi
-
 		if [ ! -f "${SHLOGS}/access_log" ]; then
-			echo "" > ${SHLOGS}/access_log
+			touch ${SHLOGS}/access_log
 		fi
 
-	
 		chown -R $SHUSER:$SHUSER $SHROOT
 	
 		echo "${SHPASS}" > ${SHROOT}/.shpass
@@ -192,20 +191,21 @@ enableScript            1
 restrained              1
 }" >> ${LSCONF}
 
-		if [ "$USEWWW" == 'TRUE' ]; then
-        MAPPER="map                    ${DOMAIN} ${ORIGIN}, ${DOMAIN}"
-    else
-        MAPPER="map                    ${DOMAIN} ${DOMAIN}" 
-    fi
+			if [ "$USEWWW" == 'TRUE' ]; then
+		        MAPPER="map                    ${DOMAIN} ${ORIGIN}, ${DOMAIN}"
+		    else
+		        MAPPER="map                    ${DOMAIN} ${DOMAIN}" 
+		    fi
 
-    PORT_ARR=$(grep "address.*:[0-9]"  ${LSCONF} | awk '{print substr($2,3)}')
-    if [  ${#PORT_ARR[@]} != 0 ]; then
-        for PORT in ${PORT_ARR[@]}; do 
-            line_insert ":${PORT}$"  ${LSCONF} "${MAPPER}" 2
-        done
-    else
-        echo 'No listener port detected, listener setup skip!'    
-    fi
+		    PORT_ARR=$(grep "address.*:[0-9]"  ${LSCONF} | awk '{print substr($2,3)}')
+		    if [  ${#PORT_ARR[@]} != 0 ]; then
+		        for PORT in ${PORT_ARR[@]}; do 
+		            line_insert ":${PORT}$"  ${LSCONF} "${MAPPER}" 2
+		        done
+		    else
+		        echo 'No listener port detected, listener setup skip!'    
+		    fi
+
 			echo "Updating ${LSCONF} with new virtuals host record" 
 			chown -R lsadm:lsadm ${VHPATH}/*
 			systemctl restart lsws
