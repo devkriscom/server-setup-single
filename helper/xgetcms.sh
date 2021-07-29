@@ -33,11 +33,11 @@ fi
 
 if [ "$SYSTEM" == 'phpmyadmin' ]; then
 	echo "install ${SYSTEM} on ${DOMAIN}: ${SITEHTML}"
-
 	DBMNUM='5.1.1'
 	wget -P /var/www/cms https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip
 	unzip /var/www/cms/phpMyAdmin-${DBMNUM}-all-languages.zip -d ${SITEHTML}/
 	cp -r ${SITEHTML}/phpMyAdmin-${DBMNUM}-all-languages/* ${SITEHTML}/
 	rm -rf ${SITEHTML}/phpMyAdmin-${DBMNUM}-all-languages/*
+	chown -R ${USERNAME}:${USERNAME} ${SITEROOT}
 	exit 1;
 fi
