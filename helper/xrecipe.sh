@@ -3,7 +3,7 @@ DOMAIN=$1
 RECIPE=$2
 WWROOT='/home'
 
-if [ "$DOMAIN" == "" ]; do
+if [ "$DOMAIN" == "" ]; then
 	echo $"command: {domain} {recipe:wp|phpmyadmin}"
 	exit 1;
 fi

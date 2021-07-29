@@ -11,14 +11,13 @@ DOMAIN  : managedb.wordspec.com pointed to server ip
 
 apt install -y -qq curl
 curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/attach.sh
-chmod +x attach.sh 
+chmod +x attach.sh
+bash ./attach.sh 
 
-rm create.sh
 curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/create.sh
 chmod +x create.sh 
 bash ./create.sh
 
-rm helper.sh
 curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper.sh
 chmod +x helper.sh 
 bash ./helper.sh

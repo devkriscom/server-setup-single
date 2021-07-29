@@ -9,7 +9,7 @@ VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
 DBROOT=$(cat /home/.mysql_root_password | head -n 1 | awk '{print}')
 
-if [ "$ACTION" == 'create' ] || [ "$ACTION" == 'delete' ]; then
+if [ "$ACTION" != 'create' ] && [ "$ACTION" != 'delete' ]; then
 	echo $"You need to select ACTION (create or delete) -- Lower-case only"
 	exit 1;
 fi
@@ -90,12 +90,14 @@ if [ "$ACTION" == 'create' ]; then
 		fi
 
 		if [ ! -f "${SHLOGS}/error_log" ]; then
-			touch ${SHLOGS}/error_log
+			echo "" > ${SHLOGS}/error_log
 		fi
 
 		if [ ! -f "${SHLOGS}/access_log" ]; then
-			touch ${SHLOGS}/access_log
+			echo "" > ${SHLOGS}/access_log
 		fi
+
+		
 		chown -R $SHUSER:$SHUSER $SHROOT
 	
 		echo "${SHPASS}" > ${SHROOT}/.userpass
