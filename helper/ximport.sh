@@ -18,6 +18,8 @@ if [ "$DBPASS" != '' ]; then
 	PASSWD="${DBPASS}";
 fi
 
+echo "import $FOLDER with dbpass $PASSWD"
+
 tar -xvf ${FOLDER}/file.tar.gz -C html
 zcat ${FOLDER}/data.sql.gz | mysql -u ${DBUSER} -p${PASSWD} ${DBNAME}
 chown -R ${SHUSER}:${SHUSER} /home/${SHUSER}/html
