@@ -18,7 +18,7 @@ SHROOT="/home/${SHUSER}";
 SHHTML="${SHROOT}/html";
 SHTEMP="${SHROOT}/temp";
 
-if [ -d "${SHHTML}" ] && [ "$(ls -A $FOLDER/html)" ]; then
+if [ -d "${SHHTML}" ] && [ "$(ls -A $SHHTML)" ]; then
 	if [ ! -d "${SHTEMP}" ]; then
 		mkdir -p ${SHTEMP}
 	fi
