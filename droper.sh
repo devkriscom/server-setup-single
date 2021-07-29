@@ -27,12 +27,5 @@ rm -rf ${LSPATH}
 echo "\n Remove root passprd ...\n"
 rm -rf ${WWROOT}/*
 
-rm /usr/local/bin/xbackup
-rm /usr/local/bin/xsecure
-rm /usr/local/bin/xdbsave
-rm /usr/local/bin/xdomain
-rm /usr/local/bin/xdrsave
-rm /usr/local/bin/xsecure
-
 apt autoremove
 apt autoclean

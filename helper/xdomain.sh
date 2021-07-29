@@ -61,6 +61,7 @@ USERNAME=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 DATAUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 DATABASE=$(echo "${DOMAIN}" | sed -e 's/\./_/g')
 DATAPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
+
 USERPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
 
 SITEROOT="${WWROOT}/${USERNAME}";
@@ -85,7 +86,7 @@ if [ "$ACTION" == 'create' ]; then
 			usermod -d $SITEROOT $USERNAME
 		fi
 	else
-		useradd -m -p "$USERPASS" "$USERNAME" -d "$SITEROOT"
+		useradd -m -p $(perl -e 'print crypt($ARGV[0], "password")' ${USERPASS}) "$USERNAME" -d "$SITEROOT"
 		if [ $? -eq 0 ]; then
 			ALLOW="YES"
 		fi
