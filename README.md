@@ -22,9 +22,13 @@ curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/i
 chmod +x install.sh 
 bash ./install.sh
 
+rm helper.sh
+curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper.sh
+chmod +x helper.sh 
+bash ./helper.sh
 
-curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper/cloner.sh
-chmod +x cloner.sh 
+curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper/xcloner.sh
+chmod +x xcloner.sh 
 
 $ chmod +x install.sh 
 # Step  1: Setup MySQL  

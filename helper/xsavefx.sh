@@ -6,13 +6,14 @@ for FULLPATH in "$WWROOT"/*; do
   if [ -d "${FULLPATH}/html" ]; then
 
     USERNAME=$(basename ${FULLPATH})
+    DATABASE=$(echo "${USERNAME}" | sed -e 's/\-/_/g')
     BASEPATH=${BKPATH}/${USERNAME}/$(date +%Y-%m-%d-%H-%M)
     mkdir -p ${BASEPATH}
     tar -zcvpf ${BASEPATH}/file.tar.gz -C ${FULLPATH}/html/ .
 
     DBPASS=$(cat ${FULLPATH}/.datapass | head -n 1 | awk '{print}')
     if [ "$DBPASS" != '' ]; then
-      mysqldump -u ${USERNAME} -p${DBPASS} ${USERNAME} | gzip > ${BASEPATH}/data.sql.gz
+      mysqldump -u ${USERNAME} -p${DBPASS} ${DATABASE} | gzip > ${BASEPATH}/data.sql.gz
     fi
     
   fi
