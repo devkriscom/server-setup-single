@@ -7,6 +7,7 @@ if [ "$DOMAIN" == "" ]; then
 	exit 1;
 fi
 
+
 SHUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 
 FOLDER="/home/${SHUSER}";
@@ -20,7 +21,10 @@ fi
 
 echo "import $FOLDER with dbpass $PASSWD"
 tar -xvf ${FOLDER}/file.tar.gz -C ${FOLDER}/html
+chown -R ${SHUSER}:${SHUSER} /home/${SHUSER}/html
+
+mkdir -p ${FOLDER}/data
+mysqldump -u root -p${PASSWD} ${DBNAME} | gzip > ${FOLDER}/data/$(date +%Y-%m-%d-%H-%M).sql.gz
 mysql -u root -p${PASSWD} -e "drop database ${DBNAME};"
 mysql -u root -p${PASSWD} -e "create database ${DBNAME};"
 zcat ${FOLDER}/data.sql.gz | mysql -u ${DBUSER} -p${PASSWD} ${DBNAME}
-chown -R ${SHUSER}:${SHUSER} /home/${SHUSER}/html
