@@ -111,13 +111,11 @@ if [ "$ACTION" == 'create' ]; then
 		echo "\n MySQL password: $DBPASS";
 
 		# create database
-		if [ -e ${DBROOT} ]; then
+		if [ "${DBROOT}" != "" ]; then
 			if ! mysql -u root -p${DBROOT} -e "use ${DBNAME};"; then
-				mysql -u root -p${DBROOT} -e "create database ${DBNAME};"
-				if [ ${?} = 0 ]; then
-					mysql -u root -p${DBROOT} -e "CREATE USER '${DBUSER}'@'%' IDENTIFIED BY '${DBPASS}';"
-					mysql -u root -p${DBROOT} -e "GRANT ALL PRIVILEGES ON * . * TO '${DBUSER}'@'%';"
-				fi
+				mysql -u root -p${DBROOT} -e "CREATE DATABASE ${DBNAME};"
+				mysql -u root -p${DBROOT} -e "CREATE USER '${DBUSER}'@'%' IDENTIFIED BY '${DBPASS}';"
+				mysql -u root -p${DBROOT} -e "GRANT ALL PRIVILEGES ON * . * TO '${DBUSER}'@'%';"
 			else
 				mysql -u root -p${DBROOT} -e "ALTER USER '${DBUSER}'@'%' IDENTIFIED BY '${DBPASS}';"
 			fi
