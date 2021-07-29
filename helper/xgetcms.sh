@@ -16,10 +16,8 @@ if [ "$GETWWW" == "www." ]; then
 	USEWWW='TRUE'
 	ORIGIN="${DOMAIN}"
 	DOMAIN=$(echo "${DOMAIN}" | cut -c 5-)
-	echo "$DOMAIN using www: $USEWWW" 
-else
-	echo "$DOMAIN without www"  
 fi
+
 USERNAME=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 SITEROOT="${WWROOT}/${USERNAME}";
 SITEHTML="${WWROOT}/${USERNAME}/html";
@@ -33,7 +31,7 @@ if [ ! -d "/var/www/cms" ]; then
 	mkdir -p /var/www/cms
 fi
 
-if [ "$SYSTEM" != 'phpmyadmin' ]; then
+if [ "$SYSTEM" == 'phpmyadmin' ]; then
 	DBMNUM='5.1.1'
 	wget -P /var/www/cms https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip
 	unzip /var/www/cms/phpMyAdmin-${DBMNUM}-all-languages.zip -d ${SITEHTML}/
