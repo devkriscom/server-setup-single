@@ -25,9 +25,7 @@ while [ "$SECURE" == "" ]; do
 done
 
 
-if [ $(id -u) -eq 0 ]; then
-	echo "You have sudo, processing...."
-else
+if [[ $(id -u) -ne 0 ]]; then
 	echo "Only root/sudo user allowed. Bye."
 	exit 2
 fi
@@ -97,18 +95,18 @@ if [ "$ACTION" == 'create' ]; then
 			echo "" > ${SHLOGS}/access_log
 		fi
 
-		
+	
 		chown -R $SHUSER:$SHUSER $SHROOT
 	
-		echo "${SHPASS}" > ${SHROOT}/.userpass
-		echo "${DBPASS}" > ${SHROOT}/.datapass
+		echo "${SHPASS}" > ${SHROOT}/.shpass
+		echo "${DBPASS}" > ${SHROOT}/.dbpass
 
-		echo "\n SFTPD username: $SHUSER";
-		echo "\n SFTPD password: $SHPASS";
 		echo "\n MySQL rootpass: $DBROOT";
 		echo "\n MySQL database: $DBNAME";
 		echo "\n MySQL username: $DBUSER";
 		echo "\n MySQL password: $DBPASS";
+		echo "\n SFTPD username: $SHUSER";
+		echo "\n SFTPD password: $SHPASS";
 
 		# create database
 		if [ "${DBROOT}" != "" ]; then

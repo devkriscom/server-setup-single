@@ -21,7 +21,7 @@ DBUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 DBNAME=$(echo "${DOMAIN}" | sed -e 's/\./_/g')
 SHROOT="/home/${SHUSER}";
 
-DBPASS=$(cat ${SHROOT}/.datapass | head -n 1 | awk '{print}')
+DBPASS=$(cat ${SHROOT}/.dbpass | head -n 1 | awk '{print}')
 if [ "$MYPASS" != '' ]; then
 	DBPASS="${MYPASS}";
 fi

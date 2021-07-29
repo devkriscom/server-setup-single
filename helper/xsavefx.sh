@@ -16,7 +16,7 @@ for SHROOT in /home/*; do
 
     tar -zcvpf ${BASEPATH}/file.tar.gz -C ${SHROOT}/html/ .
     
-    DBPASS=$(cat ${SHROOT}/.datapass | head -n 1 | awk '{print}')
+    DBPASS=$(cat ${SHROOT}/.dbpass | head -n 1 | awk '{print}')
     if [ "$DBPASS" != '' ]; then
       mysqldump -u ${SHUSER} -p${DBPASS} ${DBNAME} | gzip > ${BASEPATH}/data.sql.gz
     fi
