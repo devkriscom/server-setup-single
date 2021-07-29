@@ -7,10 +7,9 @@ PHPVER=lsphp74
 LSPATH='/usr/local/lsws'
 VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
-DBROOT="${WWROOT}/.mysql_root_password"
-DBPASS=$(cat ${DBROOT} | head -n 1 | awk '{print}')
+DBROOT=$(cat /home/.mysql_root_password | head -n 1 | awk '{print}')
 
-if [ "$ACTION" != 'create' ] && [ "$ACTION" != 'delete' ]; then
+if [ "$ACTION" == 'create' ] || [ "$ACTION" == 'delete' ]; then
 	echo $"You need to select ACTION (create or delete) -- Lower-case only"
 	exit 1;
 fi
@@ -42,112 +41,105 @@ line_insert(){
     fi  
 }
 
-#check if use www
 USEWWW=''
 GETWWW=$(echo "${DOMAIN}" | cut -c 1-4)
-echo "domain www check: $GETWWW"
 if [ "$GETWWW" == "www." ]; then
 	USEWWW='TRUE'
 	ORIGIN="${DOMAIN}"
 	DOMAIN=$(echo "${DOMAIN}" | cut -c 5-)
-	echo "$DOMAIN using www: $USEWWW" 
-else
-	echo "$DOMAIN without www"  
 fi
 
-SITEMAIL="admin@${DOMAIN}";
-USERNAME=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
+SHMAIL="admin@${DOMAIN}";
+SHUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
+SHROOT="/home/${SHUSER}";
+SHHTML="${SHROOT}/html";
+SHLOGS="${SHROOT}/logs";
+SHCONF="${VHPATH}/${DOMAIN}/vhconf.conf";
+SHPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
 
-DATAUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
-DATABASE=$(echo "${DOMAIN}" | sed -e 's/\./_/g')
-DATAPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
 
-USERPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
+DBNAME=$(echo "${DOMAIN}" | sed -e 's/\./_/g')
+DBUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
+DBPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
 
-SITEROOT="${WWROOT}/${USERNAME}";
-SITEHTML="${WWROOT}/${USERNAME}/html";
-SITECONF="${VHPATH}/${DOMAIN}/vhconf.conf";
-
-if [ "$ACTION" == 'create' ]; then
-	sed -i "/$DOMAIN/d"  ${WWROOT}/.domains
-	sed -i "/$USERNAME/d" ${WWROOT}/.usernames
-fi
 
 if [ "$ACTION" == 'create' ]; then
 	ALLOW="NO"
 	# verify if user alreay exist
-	egrep "^$USERNAME" /etc/passwd > /dev/null
+	egrep "^$SHUSER" /etc/passwd > /dev/null
 	if [ $? -eq 0 ]; then
-		if [ -d "${SITEROOT}" ]; then
-			echo "$USERNAME exists! please create using another user"
-			exit 1
-		else
+		# if user exists but doesn't have site, then reassign
+		if [ ! -d "${SHROOT}" ]; then
 			ALLOW="YES"
-			usermod -d $SITEROOT $USERNAME
+			usermod -d $SHROOT $SHUSER
 		fi
 	else
-		useradd -m -p $(perl -e 'print crypt($ARGV[0], "password")' ${USERPASS}) "$USERNAME" -d "$SITEROOT"
+		useradd -m -p $(perl -e 'print crypt($ARGV[0], "password")' ${SHPASS}) "$SHUSER" -d "$SHROOT"
 		if [ $? -eq 0 ]; then
 			ALLOW="YES"
 		fi
 	fi
 
 	if [ "$ALLOW" == 'YES' ]; then
-		mkdir -p $SITEHTML
-		if [ ! -f "${SITEHTML}/index.php" ]; then
-			echo "<?php echo phpinfo(); ?>" > $SITEHTML/index.php
+		if [ ! -d "${SHHTML}" ]; then
+			mkdir -p $SHHTML
 		fi
-		chown -R $USERNAME:$USERNAME $SITEROOT
-	
-		echo "${DOMAIN}" >> ${WWROOT}/.domains
-		echo "${USERNAME}" >> ${WWROOT}/.usernames
-		echo "${USERPASS}" > ${SITEROOT}/.userpass
-		echo "${DATAPASS}" > ${SITEROOT}/.datapass
 
-		echo "\n SFTPD username: $USERNAME";
-		echo "\n SFTPD password: $USERPASS";
-		echo "\n MySQL rootpass: $DBPASS";
-		echo "\n MySQL database: $DATABASE";
-		echo "\n MySQL username: $DATAUSER";
-		echo "\n MySQL password: $DATAPASS";
+		if [ ! -d "${SHLOGS}" ]; then
+			mkdir -p $SHHTML
+		fi
+
+		if [ ! -f "${SHLOGS}/error_log" ]; then
+			touch ${SHLOGS}/error_log
+		fi
+
+		if [ ! -f "${SHLOGS}/access_log" ]; then
+			touch ${SHLOGS}/access_log
+		fi
+		chown -R $SHUSER:$SHUSER $SHROOT
+	
+		echo "${SHPASS}" > ${SHROOT}/.userpass
+		echo "${DBPASS}" > ${SHROOT}/.datapass
+
+		echo "\n SFTPD username: $SHUSER";
+		echo "\n SFTPD password: $SHPASS";
+		echo "\n MySQL rootpass: $DBROOT";
+		echo "\n MySQL database: $DBNAME";
+		echo "\n MySQL username: $DBUSER";
+		echo "\n MySQL password: $DBPASS";
 
 		# create database
 		if [ -e ${DBROOT} ]; then
-			if ! mysql -u root -p${DBPASS} -e "use ${DATABASE};"; then
-				mysql -u root -p${DBPASS} -e "create database ${DATABASE};"
+			if ! mysql -u root -p${DBROOT} -e "use ${DBNAME};"; then
+				mysql -u root -p${DBROOT} -e "create database ${DBNAME};"
 				if [ ${?} = 0 ]; then
-					mysql -u root -p${DBPASS} -e "CREATE USER '${DATAUSER}'@'%' IDENTIFIED BY '${DATAPASS}';"
-					mysql -u root -p${DBPASS} -e "GRANT ALL PRIVILEGES ON * . * TO '${DATAUSER}'@'%';"
-					mysql -u root -p${DBPASS} -e "FLUSH PRIVILEGES;"
-					mysql -u root -p${DBPASS} -e "SHOW GRANTS FOR '${DATAUSER}'@'%';"
-				else
-					echo "something went wrong when create new database, please proceed to manual installtion."
+					mysql -u root -p${DBROOT} -e "CREATE USER '${DBUSER}'@'%' IDENTIFIED BY '${DBPASS}';"
+					mysql -u root -p${DBROOT} -e "GRANT ALL PRIVILEGES ON * . * TO '${DBUSER}'@'%';"
 				fi
 			else
-				mysql -u root -p${DBPASS} -e "ALTER USER '${DATAUSER}'@'%' IDENTIFIED BY '${DATAPASS}';"
-				mysql -u root -p${DBPASS} -e "FLUSH PRIVILEGES;"
+				mysql -u root -p${DBROOT} -e "ALTER USER '${DBUSER}'@'%' IDENTIFIED BY '${DBPASS}';"
 			fi
-		else
-			echo "Doesnt have ${DBROOT}, skip creating database!" 
+			mysql -u root -p${DBROOT} -e "FLUSH PRIVILEGES;"
+			mysql -u root -p${DBROOT} -e "SHOW GRANTS FOR '${DBUSER}'@'%';" 
 		fi  
 
 		#create virtual hosts
-		if [ ! -f "${SITECONF}" ]; then
-			mkdir -p "${SITECONF%/*}" && touch "$SITECONF"
-			cat > ${SITECONF} << EOF
+		if [ ! -f "${SHCONF}" ]; then
+			mkdir -p "${SHCONF%/*}" && touch "$SHCONF"
+			cat > ${SHCONF} << EOF
 docRoot                   \$VH_ROOT/html
 vhDomain                  $DOMAIN
 vhAliases                 www.$DOMAIN
-adminEmails               $SITEMAIL
+adminEmails               $SHMAIL
 enableGzip                1
 
-errorlog \$SITEROOT/logs/error_log {
+errorlog \$SHROOT/logs/error_log {
 	useServer               0
 	logLevel                ERROR
 	rollingSize             10M
 }
 
-accesslog \$SITEROOT/logs/access_log {
+accesslog \$SHROOT/logs/access_log {
 	useServer               0
 	logFormat               "%v %h %l %u %t "%r" %>s %b"
 	logHeaders              5
@@ -166,7 +158,7 @@ scripthandler  {
 
 extprocessor ${PHPVER} {
 	type                    lsapi
-	address                 uds://tmp/lshttpd/${USERNAME}.sock
+	address                 uds://tmp/lshttpd/${SHUSER}.sock
 	maxConns                35
 	env                     PHP_LSAPI_CHILDREN=35
 	initTimeout             60
@@ -177,8 +169,8 @@ extprocessor ${PHPVER} {
 	path                    ${LSPATH}/${PHPVER}/bin/lsphp
 	backlog                 100
 	instances               1
-	extUser                 ${USERNAME}
-	extGroup                ${USERNAME}
+	extUser                 ${SHUSER}
+	extGroup                ${SHUSER}
 	runOnStartUp            1
 	priority                0
 	memSoftLimit            2047M
@@ -195,7 +187,7 @@ EOF
 
 			echo "
 virtualhost ${DOMAIN} {
-vhRoot                  ${SITEROOT}
+vhRoot                  ${SHROOT}
 configFile              \$SERVER_ROOT/conf/vhosts/\$VH_NAME/vhconf.conf
 allowSymbolLink         1
 enableScript            1
@@ -226,9 +218,9 @@ restrained              1
 		# create ssl cerfiticate
 		if [ "$SECURE" == 'auto' ]; then
 			if [ "$USEWWW" == 'TRUE' ]; then
-	      certbot certonly --non-interactive --agree-tos -m ${SITEMAIL} --webroot -w ${SITEHTML} -d ${DOMAIN} -d www.${DOMAIN}
+	      certbot certonly --non-interactive --agree-tos -m ${SHMAIL} --webroot -w ${SHHTML} -d ${DOMAIN} -d www.${DOMAIN}
 	    else
-	      certbot certonly --non-interactive --agree-tos -m ${SITEMAIL} --webroot -w ${SITEHTML} -d ${DOMAIN}
+	      certbot certonly --non-interactive --agree-tos -m ${SHMAIL} --webroot -w ${SHHTML} -d ${DOMAIN}
 	    fi
 
 			if [ ${?} -eq 0 ]; then
@@ -239,9 +231,10 @@ vhssl  {
 	cacertfile /etc/letsencrypt/live/${DOMAIN}/fullchain.pem
 	keyfile /etc/letsencrypt/live/${DOMAIN}/privkey.pem
 	certfile /etc/letsencrypt/live/${DOMAIN}/fullchain.pem
-}" >> ${SITECONF}
+}" >> ${SHCONF}
 
-				echo "\ncertificate has been successfully installed..."  
+				
+				chown -R lsadm:lsadm ${VHPATH}/*
 				systemctl restart lsws
 			else
 					echo "Oops, cant create ssl configuration"

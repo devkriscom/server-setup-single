@@ -5,7 +5,7 @@ if [ $(id -u) -eq 0 ]; then
 	echo "You have sudo, processing...."
 else
 	echo "Only root/sudo user allowed. Bye."
-	exit 2
+	exit 1
 fi
 
 if [ "$ACTION" != 'install' ]; then
@@ -46,11 +46,11 @@ if [ "$ACTION" != 'install' ]; then
 	rm /usr/local/bin/xgetssl
 	mv xgetssl.sh /usr/local/bin/xgetssl
 
-	echo "create command: xgetcms"
-	curl -sO ${GITHUB}/master/helper/xgetcms.sh
-	chmod +x xgetcms.sh
-	rm /usr/local/bin/xgetcms
-	mv xgetcms.sh /usr/local/bin/xgetcms
+	echo "create command: xrecipe"
+	curl -sO ${GITHUB}/master/helper/xrecipe.sh
+	chmod +x xrecipe.sh
+	rm /usr/local/bin/xrecipe
+	mv xrecipe.sh /usr/local/bin/xrecipe
 
 	echo "create command: xscaner"
 	curl -sO ${GITHUB}/master/helper/xscaner.sh

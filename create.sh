@@ -5,13 +5,12 @@ PHPNUM='7.4'
 DBMNUM='5.1.1'
 PHPVER=lsphp74
 LSPATH='/usr/local/lsws'
-BKPATH='/var/www/backup'
 VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
-DBROOT="${WWROOT}/.mysql_root_password"
+DBCRED="/home/.mysql_root_password"
 
 if [ $(id -u) -ne 0 ]; then
-	echo "\nrun using root ...\n"
+	echo "run using root"
 	exit 1
 fi
 
@@ -20,17 +19,14 @@ OUTPUT=$(cat /etc/*release)
 if echo $OUTPUT | grep -q "Ubuntu 20.04" ; then
 	SERVER_OS="Ubuntu"
 else
-	echo "\nUnable to detect your OS...\n"
+	echo "Unable to detect your OS..."
 	exit 1
 fi
 
-echo "\n Update Ubuntu ...\n"
 apt update
+apt install -y wget curl zip unzip git rsync certbot memcached vsftpd
 
-echo "\n Install basic toolkits ...\n"
-apt install -y wget curl zip unzip git rsync
-
-echo "\n Install litespeed ...\n"
+echo "Install litespeed"
 wget -O - http://rpms.litespeedtech.com/debian/enable_lst_debian_repo.sh | sudo bash
 apt update
 apt install -y openlitespeed
@@ -48,28 +44,19 @@ if [ ! -f /usr/bin/php ]; then
 	fi        
 fi
 
-echo "\n Install certbot ...\n"
-apt install -y certbot
 
-echo "\n Install memcached ...\n"
-apt install -y memcached
-
-echo "\n Install vsftpd ...\n"
-apt install -y vsftpd
-
-echo "\n Install mariadb ...\n"
+echo "Install mariadb"
 apt install -y mariadb-server mariadb-client
-
-DBUSERPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '');
-mysql -e "UPDATE mysql.user SET Password = PASSWORD('${DBUSERPASS}') WHERE User = 'root'"
+DBPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '');
+mysql -e "UPDATE mysql.user SET Password = PASSWORD('${DBPASS}') WHERE User = 'root'"
 mysql -e "DROP USER ''@'localhost'"
 mysql -e "DROP USER ''@'$(hostname)'"
 mysql -e "DROP DATABASE test"
 mysql -e "FLUSH PRIVILEGES"
-echo "${DBUSERPASS}" > ${DBROOT}
+echo "${DBPASS}" > ${DBCRED}
 systemctl restart mysql
 
-echo "\n Install elasticsearch ...\n"
+echo "Install elasticsearch"
 curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
 echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
 apt update
@@ -77,27 +64,25 @@ apt install -y elasticsearch
 systemctl start elasticsearch
 systemctl enable elasticsearch
 
-echo "\n Install wp-cli ...\n"
+echo "Install wp-cli"
 if [ ! -e /usr/local/bin/wp ]; then
 	curl -sO https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 	chmod +x wp-cli.phar
 	mv wp-cli.phar /usr/local/bin/wp
 fi  
 
-
-echo "\n Install composer ...\n"
+echo "Install composer"
 if [ ! -e /usr/local/bin/composer ]; then
 	curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --force --filename=composer
 fi
 
-echo "\n Install virtualhost ...\n"
+echo "Install virtualhost"
 if [ ! -e /usr/local/bin/xdomain ]; then
 	curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper/xdomain.sh
 	chmod +x xdomain.sh
 	mv xdomain.sh /usr/local/bin/xdomain
 fi
 
-# Install Firewall
 echo "Fireall setup..."
 apt install -y ufw
 ufw allow 22,53,80,443,7080,8088/tcp
@@ -115,8 +100,6 @@ listener HTTPS {
   secure                  1
 } " >> ${LSCONF}
 
-mkdir -p "${BKPATH%/*}"
-
 echo "Optimize database"
 if [ ! -e /etc/mysql/conf.d/optimy.cnf ]; then
 	curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/config/mysql.cnf 
@@ -124,28 +107,20 @@ if [ ! -e /etc/mysql/conf.d/optimy.cnf ]; then
   systemctl restart mysql 
 fi
 
-if [ ! -e /etc/mysql/conf.d/optimy.cnf ]; then
-	curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/config/mysql.cnf 
-	mv mysql.cnf /etc/mysql/conf.d/optimy.cnf 
-  systemctl restart mysql 
-fi
-
-echo "Optimize php configuration"
+echo "Optimize php.ini"
 sed -i 's,^max_execution_time =.*$,post_max_size = 60,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini  
-sed -i 's,^memory_limit =.*$,memory_limit = 2048M,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini  
+sed -i 's,^memory_limit =.*$,memory_limit = 512M,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini  
 sed -i 's,^post_max_size =.*$,post_max_size = 128M,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini  
 sed -i 's,^upload_max_filesize =.*$,upload_max_filesize = 128M,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini 
 
 echo "Install postfix"
 apt install -y postfix 
 apt install -y mailutils
-sudo systemctl restart postfix
-
-# Clean up cache
+systemctl restart postfix
 apt clean
 
 echo "Setup litespeed admin password"
-sudo /usr/local/lsws/admin/misc/admpass.sh 
+/usr/local/lsws/admin/misc/admpass.sh 
 
 while [ "$DOMAIN" != "" ]; do
 	xdomain create $DOMAIN auto

@@ -2,18 +2,23 @@
 WWROOT='/home'
 BKPATH='/var/www/sites'
 
-for FULLPATH in "$WWROOT"/*; do
-  if [ -d "${FULLPATH}/html" ]; then
+for SHROOT in /home/*; do
+  if [ -d "${SHROOT}/html" ]; then
 
-    USERNAME=$(basename ${FULLPATH})
-    DATABASE=$(echo "${USERNAME}" | sed -e 's/\-/_/g')
-    BASEPATH=${BKPATH}/${USERNAME}/$(date +%Y-%m-%d-%H-%M)
-    mkdir -p ${BASEPATH}
-    tar -zcvpf ${BASEPATH}/file.tar.gz -C ${FULLPATH}/html/ .
+    SHUSER=$(basename ${SHROOT})
+    DBNAME=$(echo "${SHUSER}" | sed -e 's/\-/_/g')
 
-    DBPASS=$(cat ${FULLPATH}/.datapass | head -n 1 | awk '{print}')
+    BASEPATH=${BKPATH}/${SHUSER}/$(date +%Y-%m-%d-%H-%M)
+
+    if [ ! -d "${BASEPATH}" ]; then
+      mkdir -p ${BASEPATH}
+    fi
+
+    tar -zcvpf ${BASEPATH}/file.tar.gz -C ${SHROOT}/html/ .
+    
+    DBPASS=$(cat ${SHROOT}/.datapass | head -n 1 | awk '{print}')
     if [ "$DBPASS" != '' ]; then
-      mysqldump -u ${USERNAME} -p${DBPASS} ${DATABASE} | gzip > ${BASEPATH}/data.sql.gz
+      mysqldump -u ${SHUSER} -p${DBPASS} ${DBNAME} | gzip > ${BASEPATH}/data.sql.gz
     fi
     
   fi
