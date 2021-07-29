@@ -23,7 +23,7 @@ SITEROOT="${WWROOT}/${USERNAME}";
 SITEHTML="${WWROOT}/${USERNAME}/html";
 
 if [ ! -d "${SITEHTML}" ]; then
-	echo $"Folder ${USERNAME}/html doesnt exists! bye"
+	echo "Folder ${USERNAME}/html doesnt exists! bye"
 	exit 1;
 fi
 
@@ -32,6 +32,8 @@ if [ ! -d "/var/www/cms" ]; then
 fi
 
 if [ "$SYSTEM" == 'phpmyadmin' ]; then
+	echo "install ${SYSTEM} on ${DOMAIN}: ${SITEHTML}"
+
 	DBMNUM='5.1.1'
 	wget -P /var/www/cms https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip
 	unzip /var/www/cms/phpMyAdmin-${DBMNUM}-all-languages.zip -d ${SITEHTML}/
