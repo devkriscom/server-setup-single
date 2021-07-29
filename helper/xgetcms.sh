@@ -1,10 +1,10 @@
 #!/bin/bash
 DOMAIN=$1
-SYSTEM=$3
+SYSTEM=$2
 WWROOT='/home'
 
 while [ "$DOMAIN" == "" ]; do
-	echo $"command format: {install|remove} domain.com"
+	echo $"command format: {domain} {phpmyadmin}"
 	exit 1;
 done
 
@@ -33,7 +33,7 @@ if [ ! -d "/var/www/cms" ]; then
 	mkdir -p /var/www/cms
 fi
 
-if [ "$ACTION" != 'phpmyadmin' ]; then
+if [ "$SYSTEM" != 'phpmyadmin' ]; then
 	DBMNUM='5.1.1'
 	wget -P /var/www/cms https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip
 	unzip /var/www/cms/phpMyAdmin-${DBMNUM}-all-languages.zip -d ${SITEHTML}/
