@@ -6,7 +6,7 @@ WWROOT='/home'
 if [ "$DOMAIN" == "" ]; then
 	echo $"command: {domain} {recipe:wp|phpmyadmin}"
 	exit 1;
-fi
+fi 
 
 GETWWW=$(echo "${DOMAIN}" | cut -c 1-4)
 if [ "$GETWWW" == "www." ]; then
