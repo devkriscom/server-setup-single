@@ -25,6 +25,7 @@ SHUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 DBUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 DBNAME=$(echo "${DOMAIN}" | sed -e 's/\./_/g')
 SHROOT="/home/${SHUSER}";
+SHHTML="${SHROOT}/html";
 
 DBPASS=$(cat ${SHROOT}/.dbpass | head -n 1 | awk '{print}')
 if [ "$MYPASS" != '' ]; then
@@ -46,11 +47,11 @@ if [ "$ACTION" == "all" ] || [ "$ACTION" == "file" ]; then
 
 	if [ "$DOHTML" == "YES" ]; then
 		tar -xvf ${SHROOT}/file.tar.gz -C ${SHROOT}/html
-		if [ -f "$SHROOT/html/wp-config.php" ]; then
-			sed "/DB_HOST/s/'[^']*'/'${DBPASS}'/2" ${SHROOT}/html/wp-config.php
-			sed "/DB_NAME/s/'[^']*'/'${DBNAME}'/2" ${SHROOT}/html/wp-config.php
-			sed "/DB_USER/s/'[^']*'/'${DBUSER}'/2" ${SHROOT}/html/wp-config.php
-			sed "/DB_PASSWORD/s/'[^']*'/'${DBPASS}'/2" ${SHROOT}/html/wp-config.php
+		if [ -f "${SHHTML}/wp-config.php" ]; then
+			sed "/DB_HOST/s/'[^']*'/'${DBPASS}'/2" ${SHHTML}/wp-config.php
+			sed "/DB_NAME/s/'[^']*'/'${DBNAME}'/2" ${SHHTML}/wp-config.php
+			sed "/DB_USER/s/'[^']*'/'${DBUSER}'/2" ${SHHTML}/wp-config.php
+			sed "/DB_PASSWORD/s/'[^']*'/'${DBPASS}'/2" ${SHHTML}/wp-config.php
 		fi
 		chown -R ${SHUSER}:${SHUSER} /home/${SHUSER}/html
 	else
@@ -66,6 +67,7 @@ if [ "$ACTION" == "all" ] || [ "$ACTION" == "db" ]; then
 			DODATA="YES"
 		elif [ "$FORCED" == "force" ]; then
 			DODATA="YES"
+			echo "database exists, drop it"
 			mkdir -p ${SHROOT}/data
 			mysqldump -u ${DBUSER} -p${DBPASS} ${DBNAME} | gzip > ${SHROOT}/data/drop-$(date +%Y-%m-%d-%H-%M).sql.gz
 			mysql -u ${DBUSER} -p${DBPASS} -e "DROP DATABASE ${DBNAME};"
