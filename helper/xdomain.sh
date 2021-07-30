@@ -56,6 +56,7 @@ SHUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 SHROOT="/home/${SHUSER}";
 SHHTML="${SHROOT}/html";
 SHLOGS="${SHROOT}/logs";
+SHMASK="${VHPATH}/${DOMAIN}/protected";
 SHCONF="${VHPATH}/${DOMAIN}/vhconf.conf";
 SHPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '')
 
@@ -135,13 +136,13 @@ vhAliases                 www.$DOMAIN
 adminEmails               $SHMAIL
 enableGzip                1
 
-errorlog \$SHROOT/logs/error_log {
+errorlog $SHROOT/logs/error_log {
 	useServer               0
 	logLevel                ERROR
 	rollingSize             10M
 }
 
-accesslog \$SHROOT/logs/access_log {
+accesslog $SHROOT/logs/access_log {
 	useServer               0
 	logFormat               "%v %h %l %u %t "%r" %>s %b"
 	logHeaders              5
@@ -186,6 +187,7 @@ rewrite  {
 	autoLoadHtaccess        1
 }
 EOF
+			echo "mask:password:admin,user" > ${SHMASK}
 
 			echo "
 virtualhost ${DOMAIN} {
