@@ -62,7 +62,7 @@ if [ "$ACTION" == "all" ] || [ "$ACTION" == "db" ]; then
 
 	if [ -f "${SHROOT}/data.sql.gz" ]; then
 
-		if ! mysql -u root -p${MYPASS} -e "use ${DATABASE};"; then
+		if ! mysql -u ${DBUSER} -p${DBPASS} -e "use ${DATABASE};"; then
 			DODATA="YES"
 		elif [ "$FORCED" == "force" ]; then
 			DODATA="YES"
