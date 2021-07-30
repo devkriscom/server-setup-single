@@ -5,9 +5,10 @@ PHPNUM='7.4'
 DBMNUM='5.1.1'
 PHPVER=lsphp74
 LSPATH='/usr/local/lsws'
+DBCRED="/home/.dbrootpass"
 VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
-DBCRED="/home/.dbrootpass"
+GITHUB="https://raw.githubusercontent.com/wordspec/server-setup-single"
 
 if [ $(id -u) -ne 0 ]; then
 	echo "run using root"
@@ -74,13 +75,13 @@ if [ ! -e /usr/local/bin/composer ]; then
 	sudo curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --force --filename=composer
 fi
 
-echo "Install virtualhost"
-if [ ! -e /usr/local/bin/xdomain ]; then
-	sudo curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper/xdomain.sh
-	sudo chmod +x xdomain.sh
-	sudo mv xdomain.sh /usr/local/bin/xdomain
+echo "Install manager"
+if [ ! -e /usr/local/bin/xmaster ]; then
+	sudo curl -sO ${GITHUB}/master/helper.sh
+	sudo chmod +x helper.sh
+	sudo mv helper.sh /usr/local/bin/xmaster
+	sudo helper
 fi
-
 
 # create 80 listener
 sudo echo "
@@ -95,7 +96,7 @@ listener HTTPS {
 
 echo "Optimize database"
 if [ ! -e /etc/mysql/conf.d/optimy.cnf ]; then
-	sudo curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/config/mysql.cnf 
+	sudo curl -sO ${GITHUB}/master/config/mysql.cnf 
 	sudo mv mysql.cnf /etc/mysql/conf.d/optimy.cnf 
   sudo systemctl restart mysql 
 fi

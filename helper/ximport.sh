@@ -59,10 +59,10 @@ if [ "$ACTION" == "all" ] || [ "$ACTION" == "file" ]; then
 fi
 
 if [ "$ACTION" == "all" ] || [ "$ACTION" == "db" ]; then
-
+ 
 	if [ -f "${SHROOT}/data.sql.gz" ]; then
 
-		if ! mysql -u ${DBUSER} -p${DBPASS} -e "use ${DATABASE};"; then
+		if ! mysql -u ${DBUSER} -p${DBPASS} -e "use ${DBNAME};"; then
 			DODATA="YES"
 		elif [ "$FORCED" == "force" ]; then
 			DODATA="YES"
