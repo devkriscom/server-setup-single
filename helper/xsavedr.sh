@@ -2,6 +2,11 @@
 WWROOT='/home'
 BKPATH='/var/www/files'
 
+if [[ $(id -u) -ne 0 ]]; then
+  echo "Only root/sudo user allowed. Bye."
+  exit 2
+fi
+
 if [ ! -d "${BKPATH}" ]; then
   mkdir -p ${BKPATH}
 fi

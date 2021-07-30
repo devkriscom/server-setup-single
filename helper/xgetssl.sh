@@ -9,6 +9,11 @@ SSLDIR="/etc/letsencrypt/live"
 VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
 
+if [[ $(id -u) -ne 0 ]]; then
+	echo "Only root/sudo user allowed. Bye."
+	exit 2
+fi
+
 if [ "$ACTION" != 'create' ] && [ "$ACTION" != 'delete' ]; then
 	echo $"You need to select ACTION (create or delete) -- Lower-case only"
 	exit 1;
@@ -18,13 +23,6 @@ while [ "$DOMAIN" == "" ]; do
 	echo $"You need provide DOMAIN eg: create DOMAIN.com"
 	exit 1;
 done
-
-if [ $(id -u) -eq 0 ]; then
-	echo "You have sudo, processing...."
-else
-	echo "Only root/sudo user allowed. Bye."
-	exit 2
-fi
 
 #check if use www
 USEWWW=''

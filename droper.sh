@@ -8,7 +8,7 @@ LSPATH='/usr/local/lsws'
 BKPATH='/var/www/backup'
 VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
-DBROOT="${WWROOT}/.mysql_root_password"
+DBROOT="${WWROOT}/.dbrootpass"
 
 sudo awk '!a[$0]++' /etc/apt/sources.list
 

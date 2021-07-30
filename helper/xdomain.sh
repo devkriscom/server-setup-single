@@ -10,6 +10,12 @@ VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
 DBROOT=$(cat /home/.dbrootpass | head -n 1 | awk '{print}')
 
+if [[ $(id -u) -ne 0 ]]; then
+	echo "Only root/sudo user allowed. Bye."
+	exit 2
+fi
+
+
 if [ "$ACTION" != 'create' ] && [ "$ACTION" != 'delete' ]; then
 	echo $"You need to select ACTION (create or delete) -- Lower-case only"
 	exit 1;
@@ -26,10 +32,7 @@ while [ "$SECURE" == "" ]; do
 done
 
 
-if [[ $(id -u) -ne 0 ]]; then
-	echo "Only root/sudo user allowed. Bye."
-	exit 2
-fi
+
 
 line_insert(){
     LINENUM=$(grep -n "${1}" ${2} | cut -d: -f 1)
@@ -92,7 +95,7 @@ if [ "$ACTION" == 'create' ]; then
 		if [ ! -f "${SHLOGS}/error_log" ]; then
 			touch ${SHLOGS}/error_log
 		fi
-		
+
 		if [ ! -f "${SHLOGS}/access_log" ]; then
 			touch ${SHLOGS}/access_log
 		fi

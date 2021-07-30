@@ -3,6 +3,11 @@ DOMAIN=$1
 RECIPE=$2
 WWROOT='/home'
 
+if [[ $(id -u) -ne 0 ]]; then
+	echo "Only root/sudo user allowed. Bye."
+	exit 2
+fi
+
 if [ "$DOMAIN" == "" ]; then
 	echo $"command: {domain} {recipe:wp|phpmyadmin}"
 	exit 1;

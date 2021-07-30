@@ -6,6 +6,11 @@ MYPASS=$4
 DOHTML="NO"
 DODATA="NO"
 
+if [[ $(id -u) -ne 0 ]]; then
+	echo "Only root/sudo user allowed. Bye."
+	exit 2
+fi
+
 if [ "$DOMAIN" == "" ]; then
 	echo "command: {domain} {all|db|file} {force} {dbpass:optional}"
 	exit 1;

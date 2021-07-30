@@ -2,6 +2,11 @@
 WWROOT='/home'
 BKPATH='/var/www/sites'
 
+if [[ $(id -u) -ne 0 ]]; then
+  echo "Only root/sudo user allowed. Bye."
+  exit 2
+fi
+
 for SHROOT in /home/*; do
   if [ -d "${SHROOT}/html" ]; then
 
