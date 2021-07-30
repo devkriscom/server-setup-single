@@ -7,7 +7,7 @@ PHPVER=lsphp74
 LSPATH='/usr/local/lsws'
 VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
-DBCRED="/home/.mysql_root_password"
+DBCRED="/home/.dbrootpass"
 
 if [ $(id -u) -ne 0 ]; then
 	echo "run using root"
@@ -44,7 +44,6 @@ if [ ! -f /usr/bin/php ]; then
 	fi        
 fi
 
-
 echo "Install mariadb"
 apt install -y mariadb-server mariadb-client
 DBPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '');
@@ -61,7 +60,6 @@ curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add
 echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
 apt update
 apt install -y elasticsearch
-systemctl start elasticsearch
 systemctl enable elasticsearch
 
 echo "Install wp-cli"

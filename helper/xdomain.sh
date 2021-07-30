@@ -2,12 +2,13 @@
 ACTION=$1
 DOMAIN=$2
 SECURE=$3
-WWROOT='/home'
+WWROOT="/home"
 PHPVER=lsphp74
-LSPATH='/usr/local/lsws'
+LSPATH="/usr/local/lsws"
+SSLDIR="/etc/letsencrypt/live"
 VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
-DBROOT=$(cat /home/.mysql_root_password | head -n 1 | awk '{print}')
+DBROOT=$(cat /home/.dbrootpass | head -n 1 | awk '{print}')
 
 if [ "$ACTION" != 'create' ] && [ "$ACTION" != 'delete' ]; then
 	echo $"You need to select ACTION (create or delete) -- Lower-case only"
@@ -91,6 +92,7 @@ if [ "$ACTION" == 'create' ]; then
 		if [ ! -f "${SHLOGS}/error_log" ]; then
 			touch ${SHLOGS}/error_log
 		fi
+		
 		if [ ! -f "${SHLOGS}/access_log" ]; then
 			touch ${SHLOGS}/access_log
 		fi
@@ -215,23 +217,22 @@ restrained              1
 
 		# create ssl cerfiticate
 		if [ "$SECURE" == 'auto' ]; then
+
 			if [ "$USEWWW" == 'TRUE' ]; then
-	      certbot certonly --non-interactive --agree-tos -m ${SHMAIL} --webroot -w ${SHHTML} -d ${DOMAIN} -d www.${DOMAIN}
-	    else
-	      certbot certonly --non-interactive --agree-tos -m ${SHMAIL} --webroot -w ${SHHTML} -d ${DOMAIN}
-	    fi
+	      		certbot certonly --non-interactive --agree-tos -m ${SHMAIL} --webroot -w ${SHHTML} -d ${DOMAIN} -d www.${DOMAIN}
+	    	else
+	      		certbot certonly --non-interactive --agree-tos -m ${SHMAIL} --webroot -w ${SHHTML} -d ${DOMAIN}
+	    	fi
 
 			if [ ${?} -eq 0 ]; then
 				echo "
 vhssl  {
 	certchain 1
-	cacertpath /etc/letsencrypt/live/${DOMAIN}/fullchain.pem
-	cacertfile /etc/letsencrypt/live/${DOMAIN}/fullchain.pem
-	keyfile /etc/letsencrypt/live/${DOMAIN}/privkey.pem
-	certfile /etc/letsencrypt/live/${DOMAIN}/fullchain.pem
+	cacertpath ${SSLDIR}/${DOMAIN}/fullchain.pem
+	cacertfile ${SSLDIR}/${DOMAIN}/fullchain.pem
+	keyfile ${SSLDIR}/${DOMAIN}/privkey.pem
+	certfile ${SSLDIR}/${DOMAIN}/fullchain.pem
 }" >> ${SHCONF}
-
-				
 				chown -R lsadm:lsadm ${VHPATH}/*
 				systemctl restart lsws
 			else
