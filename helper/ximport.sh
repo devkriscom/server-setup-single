@@ -86,7 +86,7 @@ fi
 
 if [ "$ACTION" == "all" ] || [ "$ACTION" == "db" ]; then
 
-	if [ -f "${SHROOT}/import/data.sql.gz" ]; then
+	if [ -f "${SHROOT}/import/data.sql" ]; then
 
 		if ! mysql -u ${DBUSER} -p${DBPASS} -e "use ${DBNAME};"; then
 			DODATA="YES"
@@ -103,7 +103,7 @@ if [ "$ACTION" == "all" ] || [ "$ACTION" == "db" ]; then
 
 		if [ "$DODATA" == "YES" ]; then
 			sudo mysql -u ${DBUSER} -p${DBPASS} -e "CREATE DATABASE IF NOT EXISTS ${DBNAME};"
-			sudo zcat ${SHROOT}/import/data.sql.gz | sudo mysql -u ${DBUSER} -p${DBPASS} ${DBNAME}
+			sudo mysql -u ${DBUSER} -p${DBPASS} ${DBNAME} < ${SHROOT}/import/data.sql
 
 			if [ -f "${SHHTML}/wp-config.php" ]; then
 				TBPREF=$(cat ${SHHTML}/wp-config.php | grep "\$table_prefix" | cut -d \' -f 2)
