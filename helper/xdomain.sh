@@ -98,6 +98,10 @@ if [ "$ACTION" == 'create' ]; then
 			touch ${SHLOGS}/access_log
 		fi
 
+		if [ ! -f "${SITEHTML}/index.php" ]; then
+			echo "<?php echo phpinfo(); ?>" > ${SHHTML}/index.php
+		fi
+
 		chown -R $SHUSER:$SHUSER $SHROOT
 	
 		echo "${SHPASS}" > ${SHROOT}/.shpass
@@ -133,13 +137,13 @@ vhAliases                 www.$DOMAIN
 adminEmails               $SHMAIL
 enableGzip                1
 
-errorlog $SHROOT/logs/error_log {
+errorlog $SHLOGS/error_log {
 	useServer               0
 	logLevel                ERROR
 	rollingSize             10M
 }
 
-accesslog $SHROOT/logs/access_log {
+accesslog $SHLOGS/access_log {
 	useServer               0
 	logFormat               "%v %h %l %u %t "%r" %>s %b"
 	logHeaders              5
