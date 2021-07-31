@@ -8,7 +8,7 @@ LSPATH='/usr/local/lsws'
 DBCRED="/home/.dbrootpass"
 VHPATH="${LSPATH}/conf/vhosts"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
-GITHUB="https://raw.githubusercontent.com/wordspec/server-setup-single"
+GITHUB="https://raw.githubusercontent.com/wordspec/server-setup-single/master"
 
 if [ $(id -u) -ne 0 ]; then
 	echo "run using root"
@@ -88,7 +88,7 @@ listener HTTPS {
 
 echo "Optimize database"
 if [ ! -e /etc/mysql/conf.d/optimy.cnf ]; then
-	sudo curl -sO ${GITHUB}/master/config/mysql.cnf 
+	sudo curl -sO ${GITHUB}/config/mysql.cnf 
 	sudo mv mysql.cnf /etc/mysql/conf.d/optimy.cnf 
 	sudo systemctl restart mysql 
 fi
@@ -110,10 +110,10 @@ sudo /usr/local/lsws/admin/misc/admpass.sh
 
 echo "Install manager"
 if [ ! -e /usr/local/bin/xmaster ]; then
-	sudo curl -sO ${GITHUB}/master/helper.sh
+	sudo curl -sO ${GITHUB}/helper.sh
 	sudo chmod +x helper.sh
 	sudo mv helper.sh /usr/local/bin/xmaster
-	sudo xmaster
+	sudo xmaster update
 fi
 
 if [ "$DOMAIN" != "" ]; then
