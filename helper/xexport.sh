@@ -29,20 +29,6 @@ if [ ! -d "${ORSHROOT}/export" ]; then
 	mkdir -p ${ORSHROOT}/export
 fi
 
-DOFILE="NO"
-if [ -f "${ORSHROOT}/export/file.tar.gz" ]; then
-	if [ "$FORCED" == "force" ]; then
-		DOFILE="YES"
-		rm ${ORSHROOT}/export/file.tar.gz
-	fi
-else
-	DOFILE="YES"
-fi
-if [ "$DOFILE" == "YES" ]; then
-	tar -zcvpf ${ORSHROOT}/export/file.tar.gz -C ${ORSHROOT}/html .
-fi
-
-
 DODATA="NO"
 if [ -f "${ORSHROOT}/export/data.sql.gz" ]; then
 	if [ "$FORCED" == "force" ]; then
@@ -55,6 +41,20 @@ fi
 
 if [ "$DODATA" == "YES" ]; then
 	mysqldump -u ${ORDBUSER} -p${ORDBPASS} ${ORDBNAME} | sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' | gzip > ${ORSHROOT}/export/data.sql.gz
+fi
+
+
+DOFILE="NO"
+if [ -f "${ORSHROOT}/export/file.tar.gz" ]; then
+	if [ "$FORCED" == "force" ]; then
+		DOFILE="YES"
+		rm ${ORSHROOT}/export/file.tar.gz
+	fi
+else
+	DOFILE="YES"
+fi
+if [ "$DOFILE" == "YES" ]; then
+	tar -zcvpf ${ORSHROOT}/export/file.tar.gz -C ${ORSHROOT}/html .
 fi
 
 if [ "$HOSTIP" != "" ]; then
