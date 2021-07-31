@@ -18,11 +18,22 @@ curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/c
 chmod +x create.sh 
 bash ./create.sh
 
-curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/cloner.sh
-chmod +x cloner.sh 
 
-2. Check credentials
-$ cat /home/.dbrootpass  => to check root mysql password
 
-# Step  2: Setup MySQL  
-1. Get root mysql user  
+2. Check credentials  
+$ cat /home/.dbrootpass  => to check root mysql password  
+
+# Step  2: Create virtual host   
+1. Create virtual host  
+$ xdomain create {domain:www?.domain.com} {ssl:auto|none}  
+
+2. Install cms/apps  
+$ xrecipe domain.com {app:phpmyadmin|wp}  
+
+Tips 1: Clone from other server
+1. Login to other server ssh
+=> Install cloner
+$ curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/cloner.sh  
+$ chmod +x cloner.sh  
+$ ./cloner.sh {to_domain} {from_db_name} {from_db_user} {from_db_pass} {from_public_html} {to_ip} 
+
