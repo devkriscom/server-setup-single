@@ -40,7 +40,9 @@ else
 fi
 
 if [ "$DODATA" == "YES" ]; then
+	echo "export db";
 	mysqldump -u ${ORDBUSER} -p${ORDBPASS} ${ORDBNAME} | sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' | gzip > ${ORSHROOT}/export/data.sql.gz
+	echo "finish export db"
 fi
 
 

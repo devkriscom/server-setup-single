@@ -14,5 +14,5 @@ fi
 
 dbs=`mysql -u root -p${DBPASS} -e "SHOW DATABASES;" | grep -Ev "(Database|information_schema|performance_schema)"`
 for db in $dbs; do
-	mysqldump -u root -p${DBPASS} ${db} | gzip > ${BKPATH}/$db-$(date +%Y-%m-%d-%H-%M).sql.gz
+	mysqldump -u root -p${DBPASS} ${db} | sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' | gzip > ${BKPATH}/$db-$(date +%Y-%m-%d-%H-%M).sql.gz
 done

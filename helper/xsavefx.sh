@@ -23,7 +23,7 @@ for SHROOT in /home/*; do
     
     DBPASS=$(cat ${SHROOT}/.dbpass | head -n 1 | awk '{print}')
     if [ "$DBPASS" != '' ]; then
-      mysqldump -u ${SHUSER} -p${DBPASS} ${DBNAME} | gzip > ${BASEPATH}/data.sql.gz
+      mysqldump -u ${SHUSER} -p${DBPASS} ${DBNAME} | sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' | gzip > ${BASEPATH}/data.sql.gz
     fi
     
   fi

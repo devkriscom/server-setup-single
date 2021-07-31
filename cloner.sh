@@ -30,6 +30,6 @@ fi
 SERVER="${SHUSER}@${REMOTE}:/home/${SHUSER}/import/"
 
 tar -zcvpf $SHCOPY/file.tar.gz -C ${SOURCE} .
-mysqldump -u ${DBUSER} -p${DBPASS} ${DBNAME} | gzip > ${SHCOPY}/data.sql.gz
+mysqldump -u ${DBUSER} -p${DBPASS} ${DBNAME} | sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' | gzip > ${SHCOPY}/data.sql.gz
 scp -r ${SHCOPY}/* ${SERVER}
 rm -rf ${SHCOPY}/*

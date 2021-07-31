@@ -204,11 +204,10 @@ e. update rewrite rule to redirect http to https(optional)
 f. add wordspec.com virtual host on HTTP and HTTPS Listener  
 
 g. create MySQL user and database
-$ mysql -u root -p -e "CREATE DATABASE wordspec;"
-$ mysql -u root -p -e "CREATE USER 'wordspec'@'%' IDENTIFIED BY 'userdbpass';"
-$ mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'wordspec'@'%';"
-$ mysql -u root -p -e "FLUSH PRIVILEGES;"
-$ mysql -u root -p -e "SHOW GRANTS FOR 'wordspec'@'%';"
+mysql -u root -p -e "CREATE USER 'cbdv_vape'@'%' IDENTIFIED BY 'userdbpass';"
+mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'cbdv_vape'@'%';"
+mysql -u root -p -e "FLUSH PRIVILEGES;"
+$ mysql -u root -p -e "SHOW GRANTS FOR 'cbdv_vape'@'%';"
 
 %  Using virtual host bash
 $  xvhost create wordspec wordspec.com
