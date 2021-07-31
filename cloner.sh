@@ -27,7 +27,7 @@ REMOTE="${DOMAIN}";
 if [ "$IPADDR" != '' ]; then
 	REMOTE="${IPADDR}";
 fi
-SERVER="${SHUSER}@${REMOTE}:/home/${SHUSER}/"
+SERVER="${SHUSER}@${REMOTE}:/home/${SHUSER}/import/"
 
 tar -zcvpf $SHCOPY/file.tar.gz -C ${SOURCE} .
 mysqldump -u ${DBUSER} -p${DBPASS} ${DBNAME} | gzip > ${SHCOPY}/data.sql.gz

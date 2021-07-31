@@ -22,7 +22,7 @@ fi
 SHUSER=$(echo "${DOMAIN}" | sed -e 's/\./-/g')
 SHROOT="/home/${SHUSER}";
 SHHTML="${SHROOT}/html";
-SHTEMP="${SHROOT}/temp";
+SHREPO="${SHROOT}/repo";
 
 if [ -d "${SHHTML}" ]; then
 	ALLOW="NO"
@@ -37,16 +37,16 @@ if [ -d "${SHHTML}" ]; then
 		fi
 	fi
 	if [ "$ALLOW" == "YES" ]; then
-		if [ ! -d "${SHTEMP}" ]; then
-			mkdir -p ${SHTEMP}
+		if [ ! -d "${SHREPO}" ]; then
+			mkdir -p ${SHREPO}
 		fi
 		if [ "$RECIPE" == 'phpmyadmin' ]; then
 			DBMNUM='5.1.1'
-			wget -P ${SHTEMP} https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip
-			unzip ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages.zip -d ${SHTEMP}
-			cp -r ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages/* ${SHHTML}/
-			rm -rf ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages.zip
-			rm -rf ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages/*
+			wget -P ${SHREPO} https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip
+			unzip ${SHREPO}/phpMyAdmin-${DBMNUM}-all-languages.zip -d ${SHREPO}
+			cp -r ${SHREPO}/phpMyAdmin-${DBMNUM}-all-languages/* ${SHHTML}/
+			rm -rf ${SHREPO}/phpMyAdmin-${DBMNUM}-all-languages.zip
+			rm -rf ${SHREPO}/phpMyAdmin-${DBMNUM}-all-languages/*
 			chown -R ${SHUSER}:${SHUSER} ${SHROOT}
 		fi
 	else

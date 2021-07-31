@@ -83,7 +83,23 @@ if [ "$ACTION" == 'create' ]; then
 
 	if [ "$ALLOW" == 'YES' ]; then
 		if [ ! -d "${SHHTML}" ]; then
-			mkdir -p $SHHTML
+			mkdir -p ${SHHTML}
+		fi
+
+		if [ ! -d "${SHROOT}/repo" ]; then
+			mkdir -p ${SHROOT}/repo
+		fi
+
+		if [ ! -d "${SHROOT}/import" ]; then
+			mkdir -p ${SHROOT}/import
+		fi
+
+		if [ ! -d "${SHROOT}/backup" ]; then
+			mkdir -p ${SHROOT}/backup
+		fi
+
+		if [ ! -d "${SHROOT}/report" ]; then
+			mkdir -p ${SHROOT}/report
 		fi
 
 		if [ ! -d "${SHLOGS}" ]; then

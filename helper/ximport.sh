@@ -39,7 +39,7 @@ fi
 
 if [ "$ACTION" == "all" ] || [ "$ACTION" == "file" ]; then
 	sudo mkdir -p ${SHROOT}/data
-	if [ -d "$SHHTML" ] && [ -f "${SHROOT}/file.tar.gz" ]; then
+	if [ -d "$SHHTML" ] && [ -f "${SHROOT}/import/file.tar.gz" ]; then
 		if [ "$(ls -A $SHHTML)" ]; then
 			echo "${SHHTML} not empty, checking.."
 			if [ "$FORCED" == "clean" ]; then
@@ -48,7 +48,7 @@ if [ "$ACTION" == "all" ] || [ "$ACTION" == "file" ]; then
 				sudo mkdir -p ${SHHTML}
 			elif [ "$FORCED" == "backup" ]; then
 				DOHTML="YES"
-				sudo tar -zcvpf ${SHROOT}/data/${TAKEID}.tar.gz -C ${SHHTML}/ .
+				sudo tar -zcvpf ${SHROOT}/backup/${TAKEID}.tar.gz -C ${SHHTML}/ .
 				sudo rm -rf ${SHHTML}
 				sudo mkdir -p ${SHHTML}
 			fi
@@ -60,10 +60,9 @@ if [ "$ACTION" == "all" ] || [ "$ACTION" == "file" ]; then
 
 	if [ "$DOHTML" == "YES" ]; then
 		echo "start extracting files"
-		sudo tar -xvf ${SHROOT}/file.tar.gz -C ${SHROOT}/html
+		sudo tar -xvf ${SHROOT}/import/file.tar.gz -C ${SHROOT}/html
 
 		if [ -f "${SHHTML}/wp-config.php" ]; then
-			#sudo sed -i "/DB_HOST/s/'[^']*'/'${DBHOST}'/2" ${SHHTML}/wp-config.php
 			sudo sed -i "/DB_NAME/s/'[^']*'/'${DBNAME}'/2" ${SHHTML}/wp-config.php
 			sudo sed -i "/DB_USER/s/'[^']*'/'${DBUSER}'/2" ${SHHTML}/wp-config.php
 			sudo sed -i "/DB_PASSWORD/s/'[^']*'/'${DBPASS}'/2" ${SHHTML}/wp-config.php
@@ -86,7 +85,7 @@ fi
 
 if [ "$ACTION" == "all" ] || [ "$ACTION" == "db" ]; then
 
-	if [ -f "${SHROOT}/data.sql.gz" ]; then
+	if [ -f "${SHROOT}/import/data.sql.gz" ]; then
 
 		if ! mysql -u ${DBUSER} -p${DBPASS} -e "use ${DBNAME};"; then
 			DODATA="YES"
@@ -97,13 +96,13 @@ if [ "$ACTION" == "all" ] || [ "$ACTION" == "db" ]; then
 		elif [ "$FORCED" == "backup" ]; then
 			DODATA="YES"
 			echo "database exists, drop it"
-			sudo mysqldump -u ${DBUSER} -p${DBPASS} ${DBNAME} | gzip > ${SHROOT}/data/${TAKEID}.sql.gz
+			sudo mysqldump -u ${DBUSER} -p${DBPASS} ${DBNAME} | gzip > ${SHROOT}/backup/${TAKEID}.sql.gz
 			sudo mysql -u ${DBUSER} -p${DBPASS} -e "DROP DATABASE ${DBNAME};"
 		fi
 
 		if [ "$DODATA" == "YES" ]; then
 			sudo mysql -u ${DBUSER} -p${DBPASS} -e "CREATE DATABASE IF NOT EXISTS ${DBNAME};"
-			sudo zcat ${SHROOT}/data.sql.gz | sudo mysql -u ${DBUSER} -p${DBPASS} ${DBNAME}
+			sudo zcat ${SHROOT}/import/data.sql.gz | sudo mysql -u ${DBUSER} -p${DBPASS} ${DBNAME}
 
 			if [ -f "${SHHTML}/wp-config.php" ]; then
 				TBPREF=$(cat ${SHHTML}/wp-config.php | grep "\$table_prefix" | cut -d \' -f 2)
