@@ -78,6 +78,7 @@ if [ "$ACTION" == "all" ] || [ "$ACTION" == "file" ]; then
 		fi
 
 		sudo chown -R ${SHUSER}:${SHUSER} ${SHHTML}
+		echo "import files finish"
 	else
 		echo "file import failed because conditions doesn't satisfy system"
 	fi
@@ -108,7 +109,7 @@ if [ "$ACTION" == "all" ] || [ "$ACTION" == "db" ]; then
 				TBPREF=$(cat ${SHHTML}/wp-config.php | grep "\$table_prefix" | cut -d \' -f 2)
 				sudo mysql -u ${DBUSER} -p${DBPASS} ${DBNAME} -e "UPDATE ${TBPREF}options SET option_value='${WEBURL}' WHERE option_name = 'home' OR option_name = 'siteurl';"
 			fi
-
+			echo "import database finish"
 		else
 			echo "database import failed because conditions doesn't satisfy system"
 		fi
