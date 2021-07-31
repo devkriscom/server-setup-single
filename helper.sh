@@ -56,6 +56,14 @@ if [ "$ACTION" == 'update' ]; then
 	curl -sO ${GITHUB}/helper/ximport.sh
 	chmod +x ximport.sh
 	mv ximport.sh /usr/local/bin/ximport
+
+	echo "create command: xexport"
+	if [ -f "/usr/local/bin/xexport" ]; then 
+		rm /usr/local/bin/xexport
+	fi
+	curl -sO ${GITHUB}/helper/xexport.sh
+	chmod +x xexport.sh
+	mv xexport.sh /usr/local/bin/xexport
 	
 	echo "create command: xgetssl"
 	if [ -f "/usr/local/bin/xgetssl" ]; then 

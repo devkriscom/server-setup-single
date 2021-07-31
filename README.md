@@ -8,9 +8,9 @@ DOMAIN  : panel.wordspec.com pointed to server ip
  
 # Step  1: Install
 1. auto installer  
-$ curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/create.sh  
-$ chmod +x create.sh  
-$ bash ./create.sh  
+curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/create.sh  
+chmod +x create.sh  
+bash ./create.sh  
 
 
 2. Check credentials  
@@ -26,13 +26,13 @@ $ xrecipe domain.com {app:phpmyadmin|wp}
 Tips 1: Clone from other server
 1. Login to other server ssh
 => Install cloner
-$ curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/cloner.sh  
-$ chmod +x cloner.sh  
+curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/cloner.sh  
+chmod +x cloner.sh  
 $ ./cloner.sh {to_domain} {from_db_name} {from_db_user} {from_db_pass} {from_public_html} {to_ip} 
 
 
 Tips 2: Attach IP 
-$ apt install -y curl
-$ curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/attach.sh  
-$ chmod +x attach.sh  
-$ bash ./attach.sh  {ip_address}
+apt install -y curl
+curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/attach.sh  
+chmod +x attach.sh  
+bash ./attach.sh 
