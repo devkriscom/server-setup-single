@@ -15,23 +15,20 @@ if [[ $(id -u) -ne 0 ]]; then
 	exit 2
 fi
 
-
 if [ "$ACTION" != 'create' ] && [ "$ACTION" != 'delete' ]; then
 	echo $"You need to select ACTION (create or delete) -- Lower-case only"
 	exit 1;
 fi
 
-while [ "$DOMAIN" == "" ]; do
+if [ "$DOMAIN" == "" ]; then
 	echo $"You need provide DOMAIN eg: create DOMAIN.com"
 	exit 1;
-done
+fi
 
-while [ "$SECURE" == "" ]; do
+if [ "$SECURE" == "" ]; then
 	echo -e $"SSL (auto|none):"
 	read SECURE
-done
-
-
+fi
 
 
 line_insert(){

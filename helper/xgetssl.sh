@@ -19,10 +19,10 @@ if [ "$ACTION" != 'create' ] && [ "$ACTION" != 'delete' ]; then
 	exit 1;
 fi
 
-while [ "$DOMAIN" == "" ]; do
+if [ "$DOMAIN" == "" ]; then
 	echo $"You need provide DOMAIN eg: create DOMAIN.com"
 	exit 1;
-done
+fi
 
 #check if use www
 USEWWW=''

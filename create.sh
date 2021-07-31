@@ -24,14 +24,14 @@ else
 	exit 1
 fi
 
-sudo aptupdate
-sudo aptinstall -y wget curl zip unzip git rsync certbot memcached vsftpd
+sudo apt update
+sudo apt install -y wget curl zip unzip git rsync certbot memcached vsftpd
 
 echo "Install litespeed"
 sudo wget -O - http://rpms.litespeedtech.com/debian/enable_lst_debian_repo.sh | sudo bash
-sudo aptupdate
-sudo aptinstall -y openlitespeed
-sudo aptinstall -y lsphp74-common lsphp74-curl lsphp74-imap lsphp74-json \
+sudo apt update
+sudo apt install -y openlitespeed
+sudo apt install -y lsphp74-common lsphp74-curl lsphp74-imap lsphp74-json \
 lsphp74-mysql lsphp74-opcache lsphp74-imagick lsphp74-memcached lsphp74-redis
 
 if [ ! -f /usr/bin/php ]; then
@@ -46,7 +46,7 @@ if [ ! -f /usr/bin/php ]; then
 fi
 
 echo "Install mariadb"
-sudo aptinstall -y mariadb-server mariadb-client
+sudo apt install -y mariadb-server mariadb-client
 DBPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20; echo '');
 sudo mysql -e "UPDATE mysql.user SET Password = PASSWORD('${DBPASS}') WHERE User = 'root'"
 sudo mysql -e "DROP USER ''@'localhost'"
@@ -57,10 +57,10 @@ echo "${DBPASS}" > ${DBCRED}
 sudo systemctl restart mysql
 
 echo "Install elasticsearch"
-sudo curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-echo "deb https://artifacts.elastic.co/packages/7.x/sudo aptstable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
-sudo aptupdate
-sudo aptinstall -y elasticsearch
+sudo curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt -key add -
+echo "deb https://artifacts.elastic.co/packages/7.x/sudo apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+sudo apt update
+sudo apt install -y elasticsearch
 sudo systemctl enable elasticsearch
 
 echo "Install wp-cli"
@@ -75,30 +75,22 @@ if [ ! -e /usr/local/bin/composer ]; then
 	sudo curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --force --filename=composer
 fi
 
-echo "Install manager"
-if [ ! -e /usr/local/bin/xmaster ]; then
-	sudo curl -sO ${GITHUB}/master/helper.sh
-	sudo chmod +x helper.sh
-	sudo mv helper.sh /usr/local/bin/xmaster
-	sudo helper
-fi
-
 # create 80 listener
 sudo echo "
 listener HTTP {
-  address                 *:80
-  secure                  0
+	address                 *:80
+	secure                  0
 }
 listener HTTPS {
-  address                 *:443
-  secure                  1
+	address                 *:443
+	secure                  1
 } " >> ${LSCONF}
 
 echo "Optimize database"
 if [ ! -e /etc/mysql/conf.d/optimy.cnf ]; then
 	sudo curl -sO ${GITHUB}/master/config/mysql.cnf 
 	sudo mv mysql.cnf /etc/mysql/conf.d/optimy.cnf 
-  sudo systemctl restart mysql 
+	sudo systemctl restart mysql 
 fi
 
 echo "Optimize php.ini"
@@ -108,20 +100,28 @@ sudo sed -i 's,^post_max_size =.*$,post_max_size = 128M,' ${LSPATH}/${PHPVER}/et
 sudo sed -i 's,^upload_max_filesize =.*$,upload_max_filesize = 128M,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini 
 
 echo "Install postfix"
-sudo aptinstall -y postfix 
-sudo aptinstall -y mailutils
+sudo apt install -y postfix 
+sudo apt install -y mailutils
 sudo systemctl restart postfix
-sudo aptclean
+sudo apt clean
 
 echo "Setup litespeed admin password"
 sudo /usr/local/lsws/admin/misc/admpass.sh 
 
-while [ "$DOMAIN" != "" ]; do
+echo "Install manager"
+if [ ! -e /usr/local/bin/xmaster ]; then
+	sudo curl -sO ${GITHUB}/master/helper.sh
+	sudo chmod +x helper.sh
+	sudo mv helper.sh /usr/local/bin/xmaster
+	sudo xmaster
+fi
+
+if [ "$DOMAIN" != "" ]; then
 	xdomain create $DOMAIN auto
-done
+fi
 
 echo "Fireall setup..."
-sudo aptinstall -y ufw
+sudo apt install -y ufw
 sudo ufw allow 22,53,80,443,7080,8088/tcp
 sudo ufw default reject
 sudo ufw enable
