@@ -30,10 +30,10 @@ if [ ! -d "${ORSHROOT}/export" ]; then
 fi
 
 DODATA="NO"
-if [ -f "${ORSHROOT}/export/data.sql.gz" ]; then
+if [ -f "${ORSHROOT}/export/data.sql" ]; then
 	if [ "$FORCED" == "force" ]; then
 		DODATA="YES"
-		rm ${ORSHROOT}/export/data.sql.gz
+		rm ${ORSHROOT}/export/data.sql
 	fi
 else
 	DODATA="YES"
@@ -41,7 +41,7 @@ fi
 
 if [ "$DODATA" == "YES" ]; then
 	echo "export db";
-	mysqldump -u ${ORDBUSER} -p${ORDBPASS} ${ORDBNAME} | sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' | gzip > ${ORSHROOT}/export/data.sql.gz
+	mysqldump -u ${ORDBUSER} -p${ORDBPASS} ${ORDBNAME} | sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > ${ORSHROOT}/export/data.sql
 	echo "finish export db"
 fi
 
