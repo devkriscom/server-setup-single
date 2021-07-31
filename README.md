@@ -8,7 +8,6 @@ DOMAIN  : panel.wordspec.com pointed to server ip
  
 # Step  1: Install
 1. auto installer  
-
 $ curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/create.sh  
 $ chmod +x create.sh  
 $ bash ./create.sh  
