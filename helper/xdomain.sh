@@ -204,7 +204,7 @@ rewrite  {
 	autoLoadHtaccess        1
 }
 EOF
-			echo "mask:password:admin,user" > ${SHMASK}
+			echo "demo:demo:admin,user" > ${SHMASK}
 
 			echo "
 virtualhost ${DOMAIN} {
@@ -239,7 +239,7 @@ restrained              1
 
 		# create ssl cerfiticate
 		if [ "$SECURE" == 'auto' ]; then
-
+			
 			if [ "$USEWWW" == 'TRUE' ]; then
 	      		certbot certonly --non-interactive --agree-tos -m ${SHMAIL} --webroot -w ${SHHTML} -d ${DOMAIN} -d www.${DOMAIN}
 	    	else

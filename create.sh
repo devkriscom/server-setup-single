@@ -7,12 +7,18 @@ PHPVER=lsphp74
 LSPATH='/usr/local/lsws'
 DBCRED="/home/.dbrootpass"
 VHPATH="${LSPATH}/conf/vhosts"
+SSLDIR="/etc/letsencrypt/live"
 LSCONF="${LSPATH}/conf/httpd_config.conf"
 GITHUB="https://raw.githubusercontent.com/wordspec/server-setup-single/master"
 
 if [ $(id -u) -ne 0 ]; then
 	echo "run using root"
 	exit 1
+fi
+
+if [ "$DOMAIN" == "" ]; then
+	echo "please provide name: bash ./create.sh www?.domain.com"
+	exit 1;
 fi
 
 # detect os, exit if not supported
@@ -25,7 +31,7 @@ else
 fi
 
 sudo apt update
-sudo apt install -y wget curl zip unzip git rsync certbot memcached vsftpd
+sudo apt install -y wget curl zip unzip git rsync certbot memcached vsftpd net-tools
 
 echo "Install litespeed"
 sudo wget -O - http://rpms.litespeedtech.com/debian/enable_lst_debian_repo.sh | sudo bash
@@ -75,17 +81,6 @@ if [ ! -e /usr/local/bin/composer ]; then
 	sudo curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --force --filename=composer
 fi
 
-# create 80 listener
-sudo echo "
-listener HTTP {
-	address                 *:80
-	secure                  0
-}
-listener HTTPS {
-	address                 *:443
-	secure                  1
-} " >> ${LSCONF}
-
 echo "Optimize database"
 if [ ! -e /etc/mysql/conf.d/optimy.cnf ]; then
 	sudo curl -sO ${GITHUB}/config/mysql.cnf 
@@ -105,9 +100,6 @@ sudo apt install -y mailutils
 sudo systemctl restart postfix
 sudo apt clean
 
-echo "Setup litespeed admin password"
-sudo /usr/local/lsws/admin/misc/admpass.sh 
-
 echo "Install manager"
 if [ ! -e /usr/local/bin/xmaster ]; then
 	sudo curl -sO ${GITHUB}/helper.sh
@@ -116,12 +108,40 @@ if [ ! -e /usr/local/bin/xmaster ]; then
 	sudo xmaster update
 fi
 
-if [ "$DOMAIN" != "" ]; then
-	xdomain create $DOMAIN auto
+echo "Litespeed Listener"
+WEBURL="${DOMAIN}"
+GETWWW=$(echo "${DOMAIN}" | cut -c 1-4)
+if [ "$GETWWW" == "www." ]; then
+	USEWWW='TRUE'
+	DOMAIN=$(echo "${DOMAIN}" | cut -c 5-)
 fi
 
-echo "Fireall setup..."
+sudo echo "
+listener HTTP {
+	address                 *:80
+	secure                  0
+}
+listener HTTPS {
+	address                 *:443
+	secure                  1
+	keyFile                 ${SSLDIR}/${DOMAIN}/privkey.pem
+  certFile                ${SSLDIR}/${DOMAIN}/fullchain.pem
+  certChain               1
+} " >> ${LSCONF}
+sudo chown -R lsadm:lsadm ${VHPATH}/*
+sudo systemctl restart lsws
+sudo xdomain create ${WEBURL} auto
+
+echo "Enable firewall =>"
 sudo apt install -y ufw
-sudo ufw allow 22,53,80,443,7080,8088/tcp
+sudo ufw allow 22
+sudo ufw allow 53
+sudo ufw allow 80
+sudo ufw allow 443
+sudo ufw allow 7080
+sudo ufw allow 8088
 sudo ufw default reject
 sudo ufw enable
+
+echo "Litespeed admin password =>"
+sudo /usr/local/lsws/admin/misc/admpass.sh 
