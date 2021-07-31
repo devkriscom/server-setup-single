@@ -54,7 +54,7 @@ else
 fi
 
 if [ "$DODATA" == "YES" ]; then
-	mysqldump -u ${ORDBUSER} -p${ORDBPASS} ${ORDBNAME} | gzip > ${ORSHROOT}/export/data.sql.gz
+	mysqldump -u ${ORDBUSER} -p${ORDBPASS} ${ORDBNAME} | sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' | gzip > ${ORSHROOT}/export/data.sql.gz
 fi
 
 if [ "$HOSTIP" != "" ]; then
