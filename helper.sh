@@ -12,7 +12,6 @@ if [ "$ACTION" == 'self-update' ]; then
 	chmod +x helper.sh
 	rm /usr/local/bin/xmaster
 	mv helper.sh /usr/local/bin/xmaster
-	exit 1
 fi
 
 if [ "$ACTION" == 'update' ]; then
