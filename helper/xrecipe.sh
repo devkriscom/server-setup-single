@@ -1,6 +1,7 @@
 #!/bin/bash
 DOMAIN=$1
 RECIPE=$2
+FORCED=$3
 WWROOT='/home'
 
 if [[ $(id -u) -ne 0 ]]; then
@@ -23,22 +24,34 @@ SHROOT="/home/${SHUSER}";
 SHHTML="${SHROOT}/html";
 SHTEMP="${SHROOT}/temp";
 
-if [ -d "${SHHTML}" ] && [ "$(ls -A $SHHTML)" ]; then
-	if [ ! -d "${SHTEMP}" ]; then
-		mkdir -p ${SHTEMP}
+if [ -d "${SHHTML}" ]; then
+	ALLOW="NO"
+	if [ ! "$(ls -A $SHHTML)" ]; then
+		ALLOW="YES"
+	else
+		if [ "$FORCED" == "force" ]; then
+			ALLOW="YES"
+			sudo rm -rf ${SHHTML}/*
+		else
+			echo "html folder not empty"
+		fi
 	fi
-	if [ "$RECIPE" == 'phpmyadmin' ]; then
-		DBMNUM='5.1.1'
-		wget -P ${SHTEMP} https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip
-		unzip ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages.zip -d ${SHTEMP}
-		cp -r ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages/* ${SHHTML}/
-		rm -rf ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages.zip
-		rm -rf ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages/*
-		chown -R ${SHUSER}:${SHUSER} ${SHROOT}
+	if [ "$ALLOW" == "YES" ]; then
+		if [ ! -d "${SHTEMP}" ]; then
+			mkdir -p ${SHTEMP}
+		fi
+		if [ "$RECIPE" == 'phpmyadmin' ]; then
+			DBMNUM='5.1.1'
+			wget -P ${SHTEMP} https://files.phpmyadmin.net/phpMyAdmin/${DBMNUM}/phpMyAdmin-${DBMNUM}-all-languages.zip
+			unzip ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages.zip -d ${SHTEMP}
+			cp -r ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages/* ${SHHTML}/
+			rm -rf ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages.zip
+			rm -rf ${SHTEMP}/phpMyAdmin-${DBMNUM}-all-languages/*
+			chown -R ${SHUSER}:${SHUSER} ${SHROOT}
+		fi
+	else
+		echo "html folder not empty"
 	fi
 else
-	echo "install failed because html folder not exist or not empty"
+	echo "install failed because html folder not exist"
 fi
-
-
-

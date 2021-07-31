@@ -14,13 +14,16 @@ curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/a
 chmod +x attach.sh
 bash ./attach.sh 
 
+curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/create.sh
+chmod +x create.sh 
+bash ./create.sh
+
+
 curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/helper.sh
 chmod +x helper.sh 
 bash ./helper.sh
 
-curl -sO https://raw.githubusercontent.com/wordspec/server-setup-single/master/create.sh
-chmod +x create.sh 
-bash ./create.sh
+
 
 
 rm droper.sh
