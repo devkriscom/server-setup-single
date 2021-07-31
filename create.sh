@@ -81,18 +81,22 @@ if [ ! -e /usr/local/bin/composer ]; then
 	sudo curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --force --filename=composer
 fi
 
-echo "Optimize database"
+echo "MySQL Configuration"
 if [ ! -e /etc/mysql/conf.d/optimy.cnf ]; then
 	sudo curl -sO ${GITHUB}/config/mysql.cnf 
 	sudo mv mysql.cnf /etc/mysql/conf.d/optimy.cnf 
 	sudo systemctl restart mysql 
 fi
 
-echo "Optimize php.ini"
+echo "PHP Configuration"
 sudo sed -i 's,^max_execution_time =.*$,post_max_size = 60,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini  
 sudo sed -i 's,^memory_limit =.*$,memory_limit = 512M,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini  
 sudo sed -i 's,^post_max_size =.*$,post_max_size = 128M,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini  
 sudo sed -i 's,^upload_max_filesize =.*$,upload_max_filesize = 128M,' ${LSPATH}/${PHPVER}/etc/php/${PHPNUM}/litespeed/php.ini 
+
+echo "SSHD Configuration"
+sudo sed -i 's/#\?\(PasswordAuthentication\s*\).*$/\1 yes/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
 
 echo "Install postfix"
 sudo apt install -y postfix 

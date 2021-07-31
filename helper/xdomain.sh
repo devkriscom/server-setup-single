@@ -16,18 +16,18 @@ if [[ $(id -u) -ne 0 ]]; then
 fi
 
 if [ "$ACTION" != 'create' ] && [ "$ACTION" != 'delete' ]; then
-	echo $"You need to select ACTION (create or delete) -- Lower-case only"
+	echo "command: create www?.domain.com ssl:auto|none"
 	exit 1;
 fi
 
 if [ "$DOMAIN" == "" ]; then
-	echo $"You need provide DOMAIN eg: create DOMAIN.com"
+	echo "command: create www?.domain.com ssl:auto|none"
 	exit 1;
 fi
 
 if [ "$SECURE" == "" ]; then
-	echo -e $"SSL (auto|none):"
-	read SECURE
+	echo "command: create www?.domain.com ssl:auto|none"
+	exit 1;
 fi
 
 
